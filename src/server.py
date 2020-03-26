@@ -5,7 +5,7 @@ import sys
 import config
 '''
 Authors:
-Ajay Shrihari & Rahul Sajnanis
+Ajay Shrihari & Rahul Sajnani
 '''
 
 class Server:
