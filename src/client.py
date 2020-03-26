@@ -1,5 +1,5 @@
 import socket
-
+import config
 
 if __name__ == "__main__":
     
@@ -9,7 +9,8 @@ if __name__ == "__main__":
     client_socket.connect((host_ip, port_number))
     
     msg = client_socket.recv(1024)
-    password = input(msg.decode('utf-8') + '\n')
+    # password = input(msg.decode('utf-8') + '\n')
+    password = config.PASSWORD
     client_socket.send(password.encode('utf-8'))
     reply = client_socket.recv(1024)
 
