@@ -12,11 +12,12 @@ if __name__ == "__main__":
     password = input(msg.decode('utf-8') + '\n')
     client_socket.send(password.encode('utf-8'))
     reply = client_socket.recv(1024)
-    print(reply.decode('utf-8'))
 
-    if reply.decode('utf-8') == 'Authenticated. Welcome!':
+    if reply.decode('utf-8') == '1':
+        print('Authenticated. Welcome!')
         connection = True
-    else: 
+    else:
+        print('Incorrect password! Disconnecting')
         connection = False
 
     while connection:

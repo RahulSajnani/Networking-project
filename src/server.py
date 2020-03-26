@@ -20,10 +20,10 @@ class Server:
         client_reply = client_socket.recv(len(config.PASSWORD) + 10)
 
         if client_reply.decode('utf-8') == config.PASSWORD:
-            client_socket.send('Authenticated. Welcome!'.encode('utf-8'))    
+            client_socket.send('1'.encode('utf-8'))    
             return 1
         else:
-            client_socket.send('Incorrect password! Disconnecting'.encode('utf-8'))
+            client_socket.send('0'.encode('utf-8'))
             return 0 
 
     def getFiles(self):
@@ -31,7 +31,10 @@ class Server:
 
     def sendFile(self):
         pass
-
+    
+    def getFileHash(self):
+        pass
+    
     def run(self):
         
 
