@@ -14,7 +14,14 @@ class Server:
         self.authenticated_clients = []
         
     def authenticate(self, client_socket):
-
+        '''
+        Function to authenticate client
+        Input:
+            client_socket - client socket object
+        Returns:
+            1 - if client is authenticated
+            0 - else
+        '''
         connection_message = 'Enter password'
         client_socket.send(connection_message.encode('utf-8'))
         client_reply = client_socket.recv(len(config.PASSWORD) + 10)
@@ -29,14 +36,43 @@ class Server:
     def getFiles(self):
         pass
 
-    def sendFile(self):
+    def sendFile(self, client_socket, filename):
+        '''
+        Function to send files to client
+        TODO:
+            - Get the file
+            - Send the file to client
+        Input:
+            client_socket - client socket object
+            filename - filename to the respective file
+        Returns:
+            None 
+        '''
         pass
     
-    def getFileHash(self):
+    def getFileHash(self, client_socket, filename):
+        '''
+        Function to get file hash and send a response to the client
+        TODO:
+            - Get the file hash
+            - Send the response to client
+        Input:
+            client_socket - client socket object
+            filename - filename to the respective file
+        Returns:
+            None
+        '''
         pass
-    
+
     def run(self):
-        
+        '''
+        Runs server
+        Input: 
+            None
+        Returns:
+            None
+        Need to fix a minor bug here
+        '''
 
         self.server_socket.bind((self.host, self.port_number))
         # Listen for clients
