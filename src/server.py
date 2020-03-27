@@ -42,10 +42,21 @@ class Server:
 
     def getFiles(self, arg, start_time, end_time, files=''):
         '''
+        Function to display files present in server.
+        Output: List of Files
+        TODO:
+            - Get the files from folder with the files
+            - Put them in a list
+        Input:
+            start_time - start time for txt/pdf
+            end_time - end time for txt/pdf
+            arg - 
+            files - file directory
         '''
+
         pass
 
-    def sendFile(self, client_socket, filename):
+    def sendFile(self, client_socket, arg, filename):
         '''
         Function to send files to client(client download file)
         Output : should contain the filename , filesize ,
@@ -55,24 +66,45 @@ class Server:
             - Get the file
             - Send the file to client
         Input:
+            arg - TCP or UDP
             client_socket - client socket object
             filename - filename to the respective file
         Returns:
             None 
         '''
-        file = open(filename, 'rb')
-        reading = file.read(1024)
-        while (reading):
-            client_socket.send(reading)
+        if arg == 'tcp' or arg == 'TCP':
+            file = open(filename, 'rb')
             reading = file.read(1024)
-        file_stats = os.stat(filename)
-        file_mtime = time.localtime(os.path.getmtime(filename))
-        file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
-        file.close()
-        hasher = hashlib.md5(open(filename,'rb').read()).hexdigest()
-        print ("Sending...")
-        print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
-        
+            # print (reading)
+            while (reading):
+                client_socket.send(reading)
+                reading = file.read(1024)
+                # print (reading)
+            file_stats = os.stat(filename)
+            file_mtime = time.localtime(os.path.getmtime(filename))
+            file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
+            file.close()
+            hasher = hashlib.md5(open(filename,'rb').read()).hexdigest()
+            print ("Sending...")
+            print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
+            
+        if arg == 'udp' or arg == 'UDP':
+            file = open(filename, 'rb')
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            client_socket.sendto(b'filename',(self.host, self.port_number))
+            reading = file.read(1024)
+            while(reading):
+                if (client_socket.sendto(reading,(self.host, self.port_number))):
+                    reading = file.read(1024)
+            file_stats = os.stat(filename)
+            file_mtime = time.localtime(os.path.getmtime(filename))
+            file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
+            hasher = hashlib.md5(open(filename,'rb').read()).hexdigest()
+            print ("Sending...")
+            print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
+            file.close()
+
+           
     
     def getFileHash(self, client_socket, arg, filename=''):
         '''
@@ -89,6 +121,7 @@ class Server:
         Returns:
             None
         '''
+
         
 
         pass
@@ -121,7 +154,7 @@ class Server:
 
 
             elif command_list[0] == 'FileDownload':
-                self.sendFile(client_socket, command_list[1])
+                self.sendFile(client_socket, command_list[1], command_list[2])
 
                 pass
 
