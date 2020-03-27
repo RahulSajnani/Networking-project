@@ -3,6 +3,9 @@ from _thread import *
 import threading
 import sys
 import config
+import hashlib
+import os
+import time
 '''
 Authors:
 Ajay Shrihari & Rahul Sajnani
@@ -57,7 +60,19 @@ class Server:
         Returns:
             None 
         '''
-        pass
+        file = open(filename, 'rb')
+        reading = file.read(1024)
+        while (reading):
+            client_socket.send(reading)
+            reading = file.read(1024)
+        file_stats = os.stat(filename)
+        file_mtime = time.localtime(os.path.getmtime(filename))
+        file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
+        file.close()
+        hasher = hashlib.md5(open(filename,'rb').read()).hexdigest()
+        print ("Sending...")
+        print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
+        
     
     def getFileHash(self, client_socket, arg, filename=''):
         '''
@@ -74,6 +89,8 @@ class Server:
         Returns:
             None
         '''
+        
+
         pass
 
     def client_session(self, client_socket):
