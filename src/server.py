@@ -23,8 +23,6 @@ class Server:
         self.run_server = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage/'))
         
-        print(self.file_storage_path)
-
     def authenticate(self, client_socket):
         '''
         Function to authenticate client
@@ -132,7 +130,7 @@ class Server:
             None
         '''
 
-        if arg == 'verify' or 'VERIFY':
+        if arg == 'verify':
             arg_file = open(self.file_storage_path + '/' + filename, 'rb')
             hasher = hashlib.md5(arg_file.read()).hexdigest()
             print(filename + ' Hash: ' + hasher)
@@ -140,12 +138,21 @@ class Server:
             client_socket.send(hasher.encode('utf-8'))
             pass
         
-        if arg == 'checkall' or 'CHECKALL':
-            for file_name in os.walk(self.file_storage_path):
-                print(file_name)
-                # hasher = hashlib.md5(file_name.read()).hexdigest()
+        elif arg == 'checkall':
+            
+            print(self.file_storage_path)
+            string_to_send = ''
+            for file_name in os.listdir(self.file_storage_path):
                 
+                file_ptr = open(self.file_storage_path + '/' + file_name, 'rb')
+                hasher = hashlib.md5(file_ptr.read()).hexdigest()
+                string_to_send = string_to_send + file_name + ' hash value: ' + hasher + '\n'
+            
+            string_to_send = string_to_send + '\r \n'
+            print(string_to_send)
+            client_socket.send(string_to_send.encode('utf-8'))
 
+                
             pass
         
 

@@ -1,5 +1,6 @@
 import socket
 import config
+import os
 
 class Client:
 
@@ -9,7 +10,8 @@ class Client:
         self.host_ip = ''
         self.port_number = 13000
         self.connection = False
-
+        self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
+        
     def authenticate(self):
         
         self.client_socket.connect((self.host_ip, self.port_number))
@@ -27,7 +29,32 @@ class Client:
             print('Incorrect password! Disconnecting')
             self.connection = False
 
+    
+    def getFileHash(self, command_list):
         
+        
+        if command_list[1] == 'verify':    
+            hash_value = self.client_socket.recv(1024)
+            hash_value = hash_value.decode('utf-8')
+            print(command_list[2] + ' file hash: ' + hash_value)
+            return hash_value
+        
+        elif command_list[1] == 'checkall':
+
+            info_string = ''
+            
+            while True:
+                
+                info = self.client_socket.recv(1024)
+                info_string = info_string + info.decode('utf-8') + '\n'
+                if len(info) < 1024:
+                    break    
+
+            print(info_string)    
+
+
+
+
 
     def decode_command(self, command):
 
@@ -35,11 +62,9 @@ class Client:
         self.client_socket.send(command.encode('utf-8'))
 
         if command_list[0] == 'FileHash':
+            self.getFileHash(command_list)
             
-            if command_list[1] == 'verify':    
-                reply = self.client_socket.recv(1024)
-                reply = reply.decode('utf-8')
-                print(command_list[2] + ' file hash: ' + reply)
+            
 
 
         elif command_list[0] == 'quit':
