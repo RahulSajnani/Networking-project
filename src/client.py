@@ -1,6 +1,7 @@
 import socket
 import config
 import os
+import helper_functions
 
 class Client:
 
@@ -54,8 +55,8 @@ class Client:
 
 
 
-    def FileDownload(self, command_list, filename):
-        path = self.file_storage_path+'/'+filename
+    def FileDownload(self, command_list):
+        path = self.file_storage_path+'/' + command_list[2]
         print (path)
         if command_list[1] == 'tcp' or command_list[1] == 'TCP':
             
@@ -76,21 +77,31 @@ class Client:
 
 
 
+    def IndexGet(self, command_list):
 
-
+        string_to_print = ''
+        while True:
+            
+            info = self.client_socket.recv(1024)
+            string_to_print = string_to_print + info.decode('utf-8')
+            if len(info) < 1024:
+                break
+        
+        print(string_to_print)
 
 
     def decode_command(self, command):
 
-        command_list = command.split(' ')
+        command_list = helper_functions.string_split(command)
         self.client_socket.send(command.encode('utf-8'))
 
         if command_list[0] == 'FileHash':
             self.getFileHash(command_list)
         elif command_list[0] == 'FileDownload':
-            self.FileDownload(command_list,command_list[2])
+            self.FileDownload(command_list)
             
-            
+        elif command_list[0] == 'IndexGet':
+            self.IndexGet(command_list)  
 
 
         elif command_list[0] == 'quit':

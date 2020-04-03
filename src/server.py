@@ -6,6 +6,8 @@ import config
 import hashlib
 import os
 import time
+import helper_functions
+from datetime import datetime, date
 
 '''
 Authors:
@@ -43,7 +45,7 @@ class Server:
             client_socket.send('0'.encode('utf-8'))
             return 0 
 
-    def displayFiles(self, command_list):
+    def displayFiles(self, client_socket, command_list):
         '''
         Function to display files present in server.
         Output: List of Files
@@ -64,17 +66,31 @@ class Server:
                 string_to_send = ''
                 for entry in files:
                     stats_entry = entry.stat()
+
+                    start_time = (datetime.strptime(command_list[2], '%Y-%m-%d %H:%M:%S')) 
+                    end_time = (datetime.strptime(command_list[3], '%Y-%m-%d %H:%M:%S'))
                     
-                    mtime = time.strftime('%Y-%m-%d::%H:%M:%S', time.localtime(stats_entry.st_mtime))
+                    mtime = time.localtime(stats_entry.st_mtime)
+                    mtime = datetime(*mtime[:6])
                     size = stats_entry.st_size
 
-                    if entry.is_dir() == True and (mtime > command_list[2]):
-                        string = entry.name + " | Directory | " + " | " + mtime + " | " + size
-                        print(entry.name, entry.is_file())
-                    elif entry.is_dir() == True and (mtime > command_list[2]):
-                        string = entry.name + " | File | " + " | " + mtime + " | " + size
-                    
-                    string_to_send = string_to_send + entry.name + '|Directory|' 
+                    # print(mtime, '\n', start_time,'\n', end_time)
+                    file_time = mtime.strftime("%Y-%m-%d %H:%M:%S")
+                    string = ''
+                    if entry.is_dir() == True and (end_time > mtime) and (mtime > start_time):
+                        string = entry.name + " | Directory | " + file_time + " | " + str(size)
+                        
+                    elif ((end_time > mtime) and (mtime > start_time)):
+                        
+                        
+                        string = entry.name + " | File | " + file_time + " | " + str(size)
+                        
+                    if len(string) > 0:
+                        string_to_send = string_to_send + string + '\n'
+                print(string_to_send)
+                if string_to_send == '':
+                    string_to_send = 'No files to display within those time stamps'
+                client_socket.send(string_to_send.encode('utf-8'))
                 pass
             
 
@@ -212,7 +228,7 @@ class Server:
 
             command = command.decode('utf-8')
             
-            command_list = command.split(' ')
+            command_list = helper_functions.string_split(command)
             print(command_list)
 
             if command_list[0] == 'FileHash':
@@ -232,9 +248,9 @@ class Server:
             elif command_list[0] == 'IndexGet':
 
                 if command_list[1] == 'shortlist':
-                    self.displayFiles(command_list)
+                    self.displayFiles(client_socket, command_list)
                 elif command_list[1] == 'longlist':
-                    self.displayFiles(command_list)
+                    self.displayFiles(client_socket, command_list)
                 pass
             
             elif command_list[0] == 'quit':
@@ -254,7 +270,8 @@ class Server:
         
         '''
         
-        
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         self.server_socket.bind((self.host, self.port_number))
         # Listen for clients
         self.server_socket.listen(self.client_buffer)
