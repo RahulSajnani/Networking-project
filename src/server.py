@@ -71,6 +71,8 @@ class Server:
                     if entry.is_dir() == True and (mtime > command_list[2]):
                         string = entry.name + " | Directory | " + " | " + mtime + " | " + size
                         print(entry.name, entry.is_file())
+                    elif entry.is_dir() == True and (mtime > command_list[2]):
+                        string = entry.name + " | File | " + " | " + mtime + " | " + size
                     
                     string_to_send = string_to_send + entry.name + '|Directory|' 
                 pass
