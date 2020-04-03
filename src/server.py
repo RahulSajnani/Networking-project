@@ -24,7 +24,8 @@ class Server:
         self.authenticated_clients = []
         self.run_server = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage/'))
-        
+        self.udp_port = 6000
+
     def authenticate(self, client_socket):
         '''
         Function to authenticate client
@@ -124,7 +125,11 @@ class Server:
         # print (self.file_storage_path)
         ###########
         ## CHECK IF FILE EXISTS FIRST!!!!! 
+        
         path = self.file_storage_path+'/'+filename
+        if not os.path.isfile(path):
+            print ("Requested file not present in server")
+            pass
         if arg == 'tcp' or arg == 'TCP':
             file = open(path, 'rb')
             reading = file.read(1024)
@@ -144,24 +149,26 @@ class Server:
             print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             
         if arg == 'udp' or arg == 'UDP':
-            file = open(filename, 'rb')
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            host = '127.0.0.1'
+            file = open(path, 'rb')
+            client_udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             
-            client_ip = client_socket.getpeername()[0]
-            port_number = client_socket.getpeername()[1]
+            # client_ip = client_socket.getpeername()[0]
+            # port_number = client_socket.getpeername()[1]
             
-            client_socket.sendto(b'filename',(client_ip, port_number))
+            # client_socket.sendto(b'filename',(self.host, self.udp_port))
             reading = file.read(1024)
             while(reading):
-                if (client_socket.sendto(reading,(client_ip, port_number))):
+                if (client_udp_socket.sendto(reading,(host, self.udp_port))):
                     reading = file.read(1024)
-            file_stats = os.stat(filename)
-            file_mtime = time.localtime(os.path.getmtime(filename))
-            file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
-            hasher = hashlib.md5(open(filename,'rb').read()).hexdigest()
+            file_stats = os.stat(path)
+            file_mtime = time.localtime(os.path.getmtime(path))
+            file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime)
+            hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
             print ("Sending...")
             print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             file.close()
+            client_udp_socket.close()
 
 
            
