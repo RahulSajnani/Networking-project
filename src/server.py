@@ -105,19 +105,23 @@ class Server:
         Returns:
             None 
         '''
+        # print (self.file_storage_path)
+        path = self.file_storage_path+'/'+filename
         if arg == 'tcp' or arg == 'TCP':
-            file = open(filename, 'rb')
+            file = open(path, 'rb')
             reading = file.read(1024)
             # print (reading)
             while (reading):
                 client_socket.send(reading)
+                print (reading)
                 reading = file.read(1024)
+
                 # print (reading)
-            file_stats = os.stat(filename)
-            file_mtime = time.localtime(os.path.getmtime(filename))
+            file_stats = os.stat(path)
+            file_mtime = time.localtime(os.path.getmtime(path))
             file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
             file.close()
-            hasher = hashlib.md5(open(filename,'rb').read()).hexdigest()
+            hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
             print ("Sending...")
             print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             
@@ -140,6 +144,7 @@ class Server:
             print ("Sending...")
             print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             file.close()
+
 
            
     
@@ -220,7 +225,7 @@ class Server:
             elif command_list[0] == 'FileDownload':
                 self.sendFile(client_socket, command_list[1], command_list[2])
 
-                pass
+                
 
             elif command_list[0] == 'IndexGet':
 
