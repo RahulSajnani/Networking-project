@@ -106,6 +106,8 @@ class Server:
             None 
         '''
         # print (self.file_storage_path)
+        ###########
+        ## CHECK IF FILE EXISTS FIRST!!!!! 
         path = self.file_storage_path+'/'+filename
         if arg == 'tcp' or arg == 'TCP':
             file = open(path, 'rb')

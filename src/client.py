@@ -64,9 +64,9 @@ class Client:
                     download = self.client_socket.recv(1024)
                     print (download)
                     
-                    if not download:
-                        break
                     filedown.write(download)
+                    if len(download) < 1024:
+                        break
                     
             filedown.close()
         # self.client_socket.close()
@@ -87,7 +87,7 @@ class Client:
 
         if command_list[0] == 'FileHash':
             self.getFileHash(command_list)
-        if command_list[0] == 'FileDownload':
+        elif command_list[0] == 'FileDownload':
             self.FileDownload(command_list,command_list[2])
             
             
