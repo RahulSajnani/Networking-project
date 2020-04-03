@@ -6,6 +6,7 @@ import config
 import hashlib
 import os
 import time
+
 '''
 Authors:
 Ajay Shrihari & Rahul Sajnani
@@ -19,6 +20,8 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_buffer = 5
         self.authenticated_clients = []
+        self.run_server = False
+        self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage/'))
         
     def authenticate(self, client_socket):
         '''
@@ -40,7 +43,7 @@ class Server:
             client_socket.send('0'.encode('utf-8'))
             return 0 
 
-    def getFiles(self, arg, start_time, end_time, files=''):
+    def displayFiles(self, arg, start_time, end_time, files=''):
         '''
         Function to display files present in server.
         Output: List of Files
@@ -53,6 +56,7 @@ class Server:
             arg - 
             files - file directory
         '''
+
 
         pass
 
@@ -91,10 +95,14 @@ class Server:
         if arg == 'udp' or arg == 'UDP':
             file = open(filename, 'rb')
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            client_socket.sendto(b'filename',(self.host, self.port_number))
+            
+            client_ip = client_socket.getpeername()[0]
+            port_number = client_socket.getpeername()[1]
+            
+            client_socket.sendto(b'filename',(client_ip, port_number))
             reading = file.read(1024)
             while(reading):
-                if (client_socket.sendto(reading,(self.host, self.port_number))):
+                if (client_socket.sendto(reading,(client_ip, port_number))):
                     reading = file.read(1024)
             file_stats = os.stat(filename)
             file_mtime = time.localtime(os.path.getmtime(filename))
@@ -122,6 +130,30 @@ class Server:
             None
         '''
 
+        if arg == 'verify':
+            arg_file = open(self.file_storage_path + '/' + filename, 'rb')
+            hasher = hashlib.md5(arg_file.read()).hexdigest()
+            print(filename + ' Hash: ' + hasher)
+            
+            client_socket.send(hasher.encode('utf-8'))
+            pass
+        
+        elif arg == 'checkall':
+            
+            print(self.file_storage_path)
+            string_to_send = ''
+            for file_name in os.listdir(self.file_storage_path):
+                
+                file_ptr = open(self.file_storage_path + '/' + file_name, 'rb')
+                hasher = hashlib.md5(file_ptr.read()).hexdigest()
+                string_to_send = string_to_send + file_name + ' hash value: ' + hasher + '\n'
+            
+            string_to_send = string_to_send + '\r \n'
+            print(string_to_send)
+            client_socket.send(string_to_send.encode('utf-8'))
+
+                
+            pass
         
 
         pass
@@ -134,11 +166,16 @@ class Server:
         Returns:
             None
         '''
-
+        
         client_loop = True
         while client_loop:
 
             command = client_socket.recv(1024)
+            
+            if command == b'':
+                client_loop = False
+                client_socket.close()
+
             command = command.decode('utf-8')
             
             command_list = command.split(' ')
@@ -161,9 +198,9 @@ class Server:
             elif command_list[0] == 'IndexGet':
 
                 if command_list[1] == 'shortlist':
-                    self.getFiles(command_list[1], command_list[2], command_list[3], command_list[4])
+                    self.displayFiles(command_list[1], command_list[2], command_list[3], command_list[4])
                 elif command_list[1] == 'longlist':
-                    self.getFiles(command_list[1], command_list[2], command_list[3], command_list[4])
+                    self.displayFiles(command_list[1], command_list[2], command_list[3], command_list[4])
                 
                 pass
             
@@ -183,18 +220,21 @@ class Server:
             None
         
         '''
-
+        
+        
         self.server_socket.bind((self.host, self.port_number))
         # Listen for clients
         self.server_socket.listen(self.client_buffer)
         
-        run_server = True
-        
-        while run_server:
+        self.run_server = True
+        client_socket = None
+
+        while self.run_server:
 
             # Accepting connection with client
-            client_socket, client_ip  = self.server_socket.accept()
             
+            client_socket, client_ip  = self.server_socket.accept()
+                
             if client_socket not in self.authenticated_clients:
                 auth = self.authenticate(client_socket)
                 if auth == 0:
@@ -212,4 +252,5 @@ class Server:
 if __name__ == "__main__":
     
     server = Server()
+    
     server.run()
