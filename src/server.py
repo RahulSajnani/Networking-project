@@ -43,7 +43,7 @@ class Server:
             client_socket.send('0'.encode('utf-8'))
             return 0 
 
-    def displayFiles(self, arg, start_time, end_time, files=''):
+    def displayFiles(self, command_list):
         '''
         Function to display files present in server.
         Output: List of Files
@@ -56,6 +56,33 @@ class Server:
             arg - 
             files - file directory
         '''
+
+        if command_list[1] == "longlist":
+            
+            if len(command_list) < 5:
+                files = os.scandir(self.file_storage_path)
+                string_to_send = ''
+                for entry in files:
+                    stats_entry = entry.stat()
+                    
+                    mtime = time.strftime('%Y-%m-%d::%H:%M:%S', time.localtime(stats_entry.st_mtime))
+                    size = stats_entry.st_size
+
+                    if entry.is_dir() == True and (mtime > command_list[2]):
+                        string = entry.name + " | Directory | " + " | " + mtime + " | " + size
+                        print(entry.name, entry.is_file())
+                    
+                    string_to_send = string_to_send + entry.name + '|Directory|' 
+                pass
+            
+
+            pass
+        elif command_list[1] == "shortlist":
+            
+            pass
+
+
+
 
 
         pass
@@ -140,7 +167,6 @@ class Server:
         
         elif arg == 'checkall':
             
-            print(self.file_storage_path)
             string_to_send = ''
             for file_name in os.listdir(self.file_storage_path):
                 
@@ -148,8 +174,7 @@ class Server:
                 hasher = hashlib.md5(file_ptr.read()).hexdigest()
                 string_to_send = string_to_send + file_name + ' hash value: ' + hasher + '\n'
             
-            string_to_send = string_to_send + '\r \n'
-            print(string_to_send)
+            
             client_socket.send(string_to_send.encode('utf-8'))
 
                 
@@ -198,10 +223,9 @@ class Server:
             elif command_list[0] == 'IndexGet':
 
                 if command_list[1] == 'shortlist':
-                    self.displayFiles(command_list[1], command_list[2], command_list[3], command_list[4])
+                    self.displayFiles(command_list)
                 elif command_list[1] == 'longlist':
-                    self.displayFiles(command_list[1], command_list[2], command_list[3], command_list[4])
-                
+                    self.displayFiles(command_list)
                 pass
             
             elif command_list[0] == 'quit':

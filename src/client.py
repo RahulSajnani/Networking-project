@@ -46,7 +46,7 @@ class Client:
             while True:
                 
                 info = self.client_socket.recv(1024)
-                info_string = info_string + info.decode('utf-8') + '\n'
+                info_string = info_string + info.decode('utf-8')
                 if len(info) < 1024:
                     break    
 
@@ -78,7 +78,7 @@ class Client:
         
         while self.connection:
 
-            command = input('Write command \n')
+            command = input('$>')
             self.decode_command(command)
             
             
