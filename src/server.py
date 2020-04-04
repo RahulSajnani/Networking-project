@@ -53,57 +53,77 @@ class Server:
             - Get the files from folder with the files
             - Put them in a list
         Input:
-            start_time - start time for txt/pdf
-            end_time - end time for txt/pdf
-            arg - 
-            files - file directory
+            client_socket - socket object - client socket
+            command_list - list - list of command separated with space ( escaped with '\ ')
         '''
 
-        if command_list[1] == "longlist":
             
-            if len(command_list) < 5:
-                files = os.scandir(self.file_storage_path)
-                string_to_send = ''
-                for entry in files:
-                    stats_entry = entry.stat()
+        files = os.scandir(self.file_storage_path)
+        string_to_send = ''
+        for entry in files:
+            stats_entry = entry.stat()
 
-                    start_time = (datetime.strptime(command_list[2], '%Y-%m-%d %H:%M:%S')) 
-                    end_time = (datetime.strptime(command_list[3], '%Y-%m-%d %H:%M:%S'))
+            mtime = time.localtime(stats_entry.st_mtime)
+            mtime = datetime(*mtime[:6])
+            size = stats_entry.st_size
+
+            # print(mtime, '\n', start_time,'\n', end_time)
+            file_time = mtime.strftime("%Y-%m-%d %H:%M:%S")
+            string = ''
+            
+            if command_list[1].lower() == "shortlist":
+                start_time = (datetime.strptime(command_list[2], '%Y-%m-%d %H:%M:%S')) 
+                end_time = (datetime.strptime(command_list[3], '%Y-%m-%d %H:%M:%S'))
+            
+            
+                if entry.is_dir() == True and (end_time > mtime) and (mtime > start_time):
+                    string = entry.name + " | Directory | " + file_time + " | " + str(size)
+
+                elif ((end_time > mtime) and (mtime > start_time)):
                     
-                    mtime = time.localtime(stats_entry.st_mtime)
-                    mtime = datetime(*mtime[:6])
-                    size = stats_entry.st_size
+                    if entry.name.lower.endswith(('.pdf')):
+                        if len(command_list) == 5:
+                            if command_list[4].lower().endswith(('.pdf')):
+                                string = entry.name + " | PDF | " + file_time + " | " + str(size)
+                        else:
+                            string = entry.name + " | PDF | " + file_time + " | " + str(size)
 
-                    # print(mtime, '\n', start_time,'\n', end_time)
-                    file_time = mtime.strftime("%Y-%m-%d %H:%M:%S")
-                    string = ''
-                    if entry.is_dir() == True and (end_time > mtime) and (mtime > start_time):
-                        string = entry.name + " | Directory | " + file_time + " | " + str(size)
+                    elif entry.name.lower.endswith(('.jpg', 'jpeg', 'png')):
+                        if len(command_list) == 5:
+                            if command_list[4].lower().endswith(('.jpg', 'jpeg', 'png')):
+                                string = entry.name + " | Image | " + file_time + " | " + str(size)
+                        else:
+                            string = entry.name + " | Image | " + file_time + " | " + str(size)
+
+                    elif entry.name.lower.endswith(('.txt')):
+                        if len(command_list) == 5:
+                            if command_list[4].lower().endswith(('.jpg', 'jpeg', 'png')):
+                                string = entry.name + " | Text | " + file_time + " | " + str(size)
+                        else:
+                            string = entry.name + " | Text | " + file_time + " | " + str(size)
                         
-                    elif ((end_time > mtime) and (mtime > start_time)):
-                        
-                        
-                        string = entry.name + " | File | " + file_time + " | " + str(size)
-                        
-                    if len(string) > 0:
-                        string_to_send = string_to_send + string + '\n'
-                print(string_to_send)
-                if string_to_send == '':
-                    string_to_send = 'No files to display within those time stamps'
-                client_socket.send(string_to_send.encode('utf-8'))
-                pass
-            
+            elif command_list[1].lower() == 'longlist':
+                    
+                if entry.is_dir() == True:
+                    string = entry.name + " | Directory | " + file_time + " | " + str(size)
 
-            pass
-        elif command_list[1] == "shortlist":
-            
-            pass
+                else:
+                    if entry.name.lower.endswith(('.pdf')):
+                        string = entry.name + " | PDF | " + file_time + " | " + str(size)
 
+                    elif entry.name.lower.endswith(('.jpg', 'jpeg', 'png')):
+                        string = entry.name + " | Image | " + file_time + " | " + str(size)
 
-
-
-
-        pass
+                    elif entry.name.lower.endswith(('.txt')):
+                        string = entry.name + " | Text | " + file_time + " | " + str(size)
+                
+                    
+            if len(string) > 0:
+                string_to_send = string_to_send + string + '\n'
+        print(string_to_send)
+        if string_to_send == '':
+            string_to_send = 'No files to display within those time stamps'
+        client_socket.send(string_to_send.encode('utf-8'))
 
     def sendFile(self, client_socket, arg, filename):
         '''
