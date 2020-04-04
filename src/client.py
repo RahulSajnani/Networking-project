@@ -12,7 +12,7 @@ class Client:
         self.port_number = 13000
         self.connection = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
-        
+        self.udp_port = 6000
     def authenticate(self):
         
         self.client_socket.connect((self.host_ip, self.port_number))
@@ -71,7 +71,20 @@ class Client:
                     
             filedown.close()
         # self.client_socket.close()
-        # if command_list[1] == 'udp' or command_list[1] == 'UDP':
+        if command_list[1] == 'udp' or command_list[1] == 'UDP':
+            host = '127.0.0.1'
+            udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            udp_socket.bind((host,self.udp_port))
+            download, address = udp_socket.recvfrom(1024)
+            filedown = open(path,'wb')
+            try:
+                while(download):
+                    filedown.write(download)
+                    udp_socket.settimeout(2)
+                    download, address = udp_socket.recvfrom(1024)
+            except socket.timeout:
+                filedown.close()
+                udp_socket.close()
 
 
 
