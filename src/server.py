@@ -123,7 +123,7 @@ class Server:
                 string_to_send = string_to_send + string + '\n'
         print(string_to_send)
         if string_to_send == '':
-            string_to_send = 'No files to display within those time stamps'
+            string_to_send = 'No files to display'
         client_socket.send(string_to_send.encode('utf-8'))
 
     def sendFile(self, client_socket, arg, filename):

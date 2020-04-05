@@ -13,6 +13,7 @@ class Client:
         self.connection = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
         self.udp_port = 6000
+        self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
     
     def authenticate(self):
         
@@ -98,7 +99,34 @@ class Client:
                 udp_socket.close()
 
 
+    def Cache(self, command_list):
 
+        if command_list[1].lower() == 'show':
+
+            files = os.scandir(self.cache_directory_path)
+            string_to_display = ''
+            for entry in files:
+                stats_entry = entry.stat()
+                size = stats_entry.st_size
+                string = entry.name + " | " + size
+
+                print(entry.name + " | " + size)
+                string_to_display = string_to_display + string + '\n'
+
+            if string_to_display == '':
+                string_to_display = 'No files to display'
+            
+            print(string_to_display)
+        
+        elif command_list[1].lower() == 'verify':
+            
+            if os.path.exists(self.cache_directory_path + '/' + command_list[2]):
+                print('File exists')
+            
+            else:
+
+                pass
+        pass
 
 
     def IndexGet(self, command_list):
@@ -117,16 +145,21 @@ class Client:
     def decode_command(self, command):
 
         command_list = helper_functions.string_split(command)
-        self.client_socket.send(command.encode('utf-8'))
+        
+        if command_list[0].lower() != 'cache':
+            self.client_socket.send(command.encode('utf-8'))
 
         if command_list[0] == 'FileHash':
             self.getFileHash(command_list)
+
         elif command_list[0] == 'FileDownload':
             self.FileDownload(command_list)
             
         elif command_list[0] == 'IndexGet':
             self.IndexGet(command_list)  
 
+        elif command_list[0] == 'Cache':
+            self.Cache(command_list)
 
         elif command_list[0] == 'quit':
             self.connection = False
