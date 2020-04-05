@@ -75,30 +75,30 @@ class Server:
             if command_list[1].lower() == "shortlist":
                 start_time = (datetime.strptime(command_list[2], '%Y-%m-%d %H:%M:%S')) 
                 end_time = (datetime.strptime(command_list[3], '%Y-%m-%d %H:%M:%S'))
-            
+                # print(start_time,'\n', end_time, '\n')
             
                 if entry.is_dir() == True and (end_time > mtime) and (mtime > start_time):
                     string = entry.name + " | Directory | " + file_time + " | " + str(size)
 
                 elif ((end_time > mtime) and (mtime > start_time)):
                     
-                    if entry.name.lower.endswith(('.pdf')):
+                    if entry.name.lower().endswith(('.pdf')):
                         if len(command_list) == 5:
                             if command_list[4].lower().endswith(('.pdf')):
                                 string = entry.name + " | PDF | " + file_time + " | " + str(size)
                         else:
                             string = entry.name + " | PDF | " + file_time + " | " + str(size)
 
-                    elif entry.name.lower.endswith(('.jpg', 'jpeg', 'png')):
+                    elif entry.name.lower().endswith(('.jpg', '.jpeg', '.png')):
                         if len(command_list) == 5:
-                            if command_list[4].lower().endswith(('.jpg', 'jpeg', 'png')):
+                            if command_list[4].lower().endswith(('.jpg', '.jpeg', '.png')):
                                 string = entry.name + " | Image | " + file_time + " | " + str(size)
                         else:
                             string = entry.name + " | Image | " + file_time + " | " + str(size)
 
-                    elif entry.name.lower.endswith(('.txt')):
+                    elif entry.name.lower().endswith(('.txt')):
                         if len(command_list) == 5:
-                            if command_list[4].lower().endswith(('.jpg', 'jpeg', 'png')):
+                            if command_list[4].lower().endswith(('.txt')):
                                 string = entry.name + " | Text | " + file_time + " | " + str(size)
                         else:
                             string = entry.name + " | Text | " + file_time + " | " + str(size)
@@ -109,13 +109,13 @@ class Server:
                     string = entry.name + " | Directory | " + file_time + " | " + str(size)
 
                 else:
-                    if entry.name.lower.endswith(('.pdf')):
+                    if entry.name.lower().endswith(('.pdf')):
                         string = entry.name + " | PDF | " + file_time + " | " + str(size)
 
-                    elif entry.name.lower.endswith(('.jpg', 'jpeg', 'png')):
+                    elif entry.name.lower().endswith(('.jpg', '.jpeg', '.png')):
                         string = entry.name + " | Image | " + file_time + " | " + str(size)
 
-                    elif entry.name.lower.endswith(('.txt')):
+                    elif entry.name.lower().endswith(('.txt')):
                         string = entry.name + " | Text | " + file_time + " | " + str(size)
                 
                     
@@ -156,7 +156,6 @@ class Server:
             # print (reading)
             while (reading):
                 client_socket.send(reading)
-                print (reading)
                 reading = file.read(1024)
 
                 # print (reading)
@@ -169,18 +168,25 @@ class Server:
             print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             
         if arg == 'udp' or arg == 'UDP':
-            host = '127.0.0.1'
+            
             file = open(path, 'rb')
             client_udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             
-            # client_ip = client_socket.getpeername()[0]
-            # port_number = client_socket.getpeername()[1]
+            client_ip = client_socket.getpeername()[0]
+            port_number = client_socket.getpeername()[1]
             
+            if client_ip == '':
+                client_ip = '127.0.0.1'
             # client_socket.sendto(b'filename',(self.host, self.udp_port))
             reading = file.read(1024)
-            while(reading):
-                if (client_udp_socket.sendto(reading,(host, self.udp_port))):
+
+            while(True):
+                if (client_udp_socket.sendto(reading,(host, port_number))):
                     reading = file.read(1024)
+
+                if len(reading) < 1024:
+                    break
+
             file_stats = os.stat(path)
             file_mtime = time.localtime(os.path.getmtime(path))
             file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime)

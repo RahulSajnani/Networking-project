@@ -13,6 +13,7 @@ class Client:
         self.connection = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
         self.udp_port = 6000
+    
     def authenticate(self):
         
         self.client_socket.connect((self.host_ip, self.port_number))
@@ -30,7 +31,19 @@ class Client:
             print('Incorrect password! Disconnecting')
             self.connection = False
 
-    
+    def receiveData(self):
+        
+        info_string = ''
+            
+        while True:
+            
+            info = self.client_socket.recv(1024)
+            info_string = info_string + info.decode('utf-8')
+            if len(info) < 1024:
+                break    
+
+        return info_string
+
     def getFileHash(self, command_list):
         
         
@@ -42,14 +55,14 @@ class Client:
         
         elif command_list[1] == 'checkall':
 
-            info_string = ''
+            info_string = self.receiveData()
             
-            while True:
+            # while True:
                 
-                info = self.client_socket.recv(1024)
-                info_string = info_string + info.decode('utf-8')
-                if len(info) < 1024:
-                    break    
+            #     info = self.client_socket.recv(1024)
+            #     info_string = info_string + info.decode('utf-8')
+            #     if len(info) < 1024:
+            #         break    
 
             print(info_string)    
 
@@ -63,8 +76,6 @@ class Client:
             with open(path,'wb') as filedown:
                 while True:
                     download = self.client_socket.recv(1024)
-                    print (download)
-                    
                     filedown.write(download)
                     if len(download) < 1024:
                         break
