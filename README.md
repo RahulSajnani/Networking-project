@@ -15,8 +15,8 @@ Project 1: A survey on Vehicular Social Networks
 
 Project 2: File server
 - [x] Connection between client and server.
-- [ ] View files of designated folder.
-- [ ] FileHashing
-- [ ] IndexGet flag shortlist ad longlist
-- [ ] FileDownload
+- [x] View files of designated folder.
+- [x] FileHashing
+- [x] IndexGet flag shortlist ad longlist
+- [x] FileDownload
 - [ ] Caching
