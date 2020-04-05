@@ -12,6 +12,7 @@ class Client:
         self.port_number = 13000
         self.connection = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
+        # hardcoded udp port to be 6000
         self.udp_port = 6000
         self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
     
@@ -72,31 +73,43 @@ class Client:
     def FileDownload(self, command_list):
         path = self.file_storage_path+'/' + command_list[2]
         print (path)
-        if command_list[1] == 'tcp' or command_list[1] == 'TCP':
-            
-            with open(path,'wb') as filedown:
-                while True:
-                    download = self.client_socket.recv(1024)
-                    filedown.write(download)
-                    if len(download) < 1024:
-                        break
-                    
-            filedown.close()
-        # self.client_socket.close()
-        if command_list[1] == 'udp' or command_list[1] == 'UDP':
-            host = '127.0.0.1'
-            udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            udp_socket.bind((host,self.udp_port))
-            download, address = udp_socket.recvfrom(1024)
-            filedown = open(path,'wb')
-            try:
-                while(download):
-                    filedown.write(download)
-                    udp_socket.settimeout(2)
-                    download, address = udp_socket.recvfrom(1024)
-            except socket.timeout:
+        string_to_receive = "Requested file not present in server"
+        string_received = self.receiveData()
+        if string_received == string_to_receive:
+            print (string_received)
+            return None 
+        else:
+            print (string_received)
+            if command_list[1] == 'tcp' or command_list[1] == 'TCP':
+                
+                with open(path,'wb') as filedown:
+                    while True:
+                        download = self.client_socket.recv(1024)
+                        filedown.write(download)
+                        if len(download) < 1024:
+                            break
+                        
                 filedown.close()
-                udp_socket.close()
+            # self.client_socket.close()
+            elif command_list[1] == 'udp' or command_list[1] == 'UDP':
+                udp_socket = ''
+                if udp_socket != '':
+                    udp_socket.close()
+                udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                client_ip = self.client_socket.getsockname()[0]
+                # print ("Host", client_ip)
+                # print ("Port", self.udp_port)
+                udp_socket.bind((client_ip,self.udp_port))
+                download, address = udp_socket.recvfrom(1024)
+                filedown = open(path,'wb')
+                try:
+                    while(download):
+                        filedown.write(download)
+                        udp_socket.settimeout(2)
+                        download, address = udp_socket.recvfrom(1024)
+                except socket.timeout:
+                    filedown.close()
+                    udp_socket.close()
 
 
     def Cache(self, command_list):
