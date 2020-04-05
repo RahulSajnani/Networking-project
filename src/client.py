@@ -117,13 +117,12 @@ class Client:
         if command_list[1].lower() == 'show':
 
             files = os.scandir(self.cache_directory_path)
+            print (files)
             string_to_display = ''
             for entry in files:
                 stats_entry = entry.stat()
                 size = stats_entry.st_size
-                string = entry.name + " | " + size
-
-                print(entry.name + " | " + size)
+                string = entry.name + " | " + str(size)
                 string_to_display = string_to_display + string + '\n'
 
             if string_to_display == '':
@@ -138,20 +137,22 @@ class Client:
             
             else:
                 path = self.cache_directory_path + '/' + command_list[2]
-                command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
+                command = 'FileDownload tcp ' + command_list[2].replace(' ', '/ ')
+                print (command)
                 self.client_socket.send(command.encode('utf-8'))
-                
-                with open(path,'wb') as filedown:
-                    while True:
-                        download = self.client_socket.recv(1024)
-                        if download.decode('utf-8') != 'Requested file not present in server':
-                            filedown.write(download)
-                        if len(download) < 1024:
-                            break
+                # with open(path,'wb') as filedown:
+                #     while True:
+                #         download = self.client_socket.recv(1024)
+                #         # if download.decode('utf-8') != 'Requested file not present in server':
+                #          filedown.write(download)
+                #         if len(download) < 1024:
+                #             break
                     
-                    filedown.close()
+                #     filedown.close()
                 
                 print('File downloaded as it wasn\'t present in cache')
+        # elif command_list[1] == 'FileDownload':
+
         pass
 
 
