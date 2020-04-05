@@ -124,8 +124,21 @@ class Client:
                 print('File exists')
             
             else:
-
-                pass
+                path = self.cache_directory_path + '/' + command_list[2]
+                command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
+                self.client_socket.send(command.encode('utf-8'))
+                
+                with open(path,'wb') as filedown:
+                    while True:
+                        download = self.client_socket.recv(1024)
+                        if download.decode('utf-8') != 'Requested file not present in server':
+                            filedown.write(download)
+                        if len(download) < 1024:
+                            break
+                    
+                    filedown.close()
+                
+                print('File downloaded as it wasn\'t present in cache')
         pass
 
 

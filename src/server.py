@@ -149,8 +149,8 @@ class Server:
         path = self.file_storage_path+'/'+filename
         if not os.path.isfile(path):
             print ("Requested file not present in server")
-            pass
-        if arg == 'tcp' or arg == 'TCP':
+        
+        elif arg == 'tcp' or arg == 'TCP':
             file = open(path, 'rb')
             reading = file.read(1024)
             # print (reading)
@@ -167,7 +167,7 @@ class Server:
             print ("Sending...")
             print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             
-        if arg == 'udp' or arg == 'UDP':
+        elif arg == 'udp' or arg == 'UDP':
             
             file = open(path, 'rb')
             client_udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
