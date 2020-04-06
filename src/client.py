@@ -139,7 +139,7 @@ class Client:
             
             else:
                 path = self.cache_directory_path + '/' + command_list[2]
-                command = 'FileDownload tcp ' + command_list[2].replace(' ', '/ ')
+                command = 'FileDownload tcp ' + command_list[2].replace(' ', '// ')
                 print (command)
                 self.client_socket.send(command.encode('utf-8'))
                 resp = self.receiveData()
