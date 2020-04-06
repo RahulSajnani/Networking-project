@@ -119,7 +119,7 @@ class Client:
         if command_list[1].lower() == 'show':
 
             files = os.scandir(self.cache_directory_path)
-            print (files)
+            # print (files)
             string_to_display = ''
             for entry in files:
                 stats_entry = entry.stat()
@@ -139,7 +139,7 @@ class Client:
             
             else:
                 path = self.cache_directory_path + '/' + command_list[2]
-                command = 'FileDownload tcp ' + command_list[2].replace(' ', '// ')
+                command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
                 print (command)
                 self.client_socket.send(command.encode('utf-8'))
                 resp = self.receiveData()
@@ -155,6 +155,10 @@ class Client:
                 
                 print('File downloaded as it wasn\'t present in cache')
         # elif command_list[1] == 'FileDownload':
+        #     files = os.scandir(self.cache_directory_path)
+        #     for entry in files:
+        #         if self.getFileHash(entry) == 
+
 
         pass
 
