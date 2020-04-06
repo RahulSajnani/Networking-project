@@ -75,16 +75,18 @@ class Client:
         print (path)
         string_to_receive = "Requested file not present in server"
         string_received = self.receiveData()
+        print ("Reached File Download fn")
         if string_received == string_to_receive:
             print (string_received)
             return None 
         else:
             print (string_received)
             if command_list[1] == 'tcp' or command_list[1] == 'TCP':
-                
+                print ("Reached inside tcp")
                 with open(path,'wb') as filedown:
                     while True:
                         download = self.client_socket.recv(1024)
+                        print (download)
                         filedown.write(download)
                         if len(download) < 1024:
                             break
@@ -140,15 +142,16 @@ class Client:
                 command = 'FileDownload tcp ' + command_list[2].replace(' ', '/ ')
                 print (command)
                 self.client_socket.send(command.encode('utf-8'))
-                # with open(path,'wb') as filedown:
-                #     while True:
-                #         download = self.client_socket.recv(1024)
-                #         # if download.decode('utf-8') != 'Requested file not present in server':
-                #          filedown.write(download)
-                #         if len(download) < 1024:
-                #             break
+                resp = self.receiveData()
+
+                with open(path,'wb') as filedown:
+                    while True:
+                        download = self.client_socket.recv(1024)
+                        filedown.write(download)
+                        if len(download) < 1024:
+                            break
                     
-                #     filedown.close()
+                filedown.close()
                 
                 print('File downloaded as it wasn\'t present in cache')
         # elif command_list[1] == 'FileDownload':
