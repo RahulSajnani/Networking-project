@@ -26,6 +26,7 @@ class Server:
         self.run_server = False
         self.file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage/'))
         self.udp_port = 6000
+        self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
 
     def authenticate(self, client_socket):
         '''
@@ -127,7 +128,7 @@ class Server:
             string_to_send = 'No files to display'
         client_socket.send(string_to_send.encode('utf-8'))
 
-    def sendFile(self, client_socket, arg, filename):
+    def sendFile(self, client_socket, command_list):
         '''
         Function to send files to client(client download file)
         Output : should contain the filename , filesize ,
@@ -146,8 +147,17 @@ class Server:
         # print (self.file_storage_path)
         ###########
         ## CHECK IF FILE EXISTS FIRST!!!!! 
+
+        if command_list[0] == 'Cache':
+            path = self.cache_directory_path + '/' + command_list[2]
+            arg = 'tcp'
+        if command_list[0] == 'FileDownload':
+            path = self.file_storage_path+'/'+ command_list[2]
+            arg = command_list[1]
         string_to_send = "Requested file not present in server"
-        path = self.file_storage_path+'/'+filename
+        filename = command_list[2]
+         
+            
         if not os.path.isfile(path):
             print (string_to_send)
             client_socket.send(string_to_send.encode('utf-8'))
@@ -287,9 +297,13 @@ class Server:
 
 
             elif command_list[0] == 'FileDownload':
-                self.sendFile(client_socket, command_list[1], command_list[2])
+                self.sendFile(client_socket, command_list)
 
-                
+            elif command_list[0] == 'Cache' and command_list[1] == 'FileDownload':
+                self.sendFile(client_socket, command_list)
+                command = client_socket.recv(1024)
+                command = command.decode('utf-8')
+
 
             elif command_list[0] == 'IndexGet':
 
