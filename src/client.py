@@ -17,7 +17,7 @@ class Client:
         self.udp_port = 6000
         self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
         
-        self.cache_size = 10
+        self.cache_size = 10 * 1024 * 1024 * 1024
 
     def authenticate(self):
         
@@ -151,17 +151,21 @@ class Client:
                     download_flag = 1
             
             if download_flag:
-
+                
+                
+                
                 command = 'FileHash verify ' + command_list[2]
                 hash_value, size = self.decode_command(command)
-                path = self.cache_directory_path + '/' + command_list[2]
                 
-                command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
-                print (command)
+                download_flag = helper_functions.clear_cache( self.cache_directory_path, size, self.cache_size)
                 
-                self.client_socket.send(command.encode('utf-8'))
-                command_list = helper_functions.string_split(command)
-                self.FileDownload(command_list, cache=1)
+                if download_flag:
+                    path = self.cache_directory_path + '/' + command_list[2]
+                    command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
+                    print (command)    
+                    self.client_socket.send(command.encode('utf-8'))
+                    command_list = helper_functions.string_split(command)
+                    self.FileDownload(command_list, cache=1)
 
     def IndexGet(self, command_list):
 
