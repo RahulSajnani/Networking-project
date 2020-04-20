@@ -66,7 +66,8 @@ class Client:
             #     if len(info) < 1024:
             #         break    
 
-            print(info_string)    
+            print(info_string)   
+            return 0 
 
 
 
@@ -135,7 +136,11 @@ class Client:
         if command_list[1].lower() == 'verify':
             
             if os.path.exists(self.cache_directory_path + '/' + command_list[2]):
+                command = 'FileHash verify ' + command_list[2]
+                hash = self.decode_command(command)
+                
                 print('File exists')
+
             
             else:
                 path = self.cache_directory_path + '/' + command_list[2]
@@ -154,6 +159,7 @@ class Client:
                 filedown.close()
                 
                 print('File downloaded as it wasn\'t present in cache')
+
         if command_list[1] == 'FileDownload':
             files = os.scandir(self.cache_directory_path)
 
@@ -210,15 +216,6 @@ class Client:
                                     break
                         filedown.close()
 
-
-
-
-
-
-
-
-
-
         pass
 
 
@@ -243,7 +240,8 @@ class Client:
             self.client_socket.send(command.encode('utf-8'))
 
         if command_list[0] == 'FileHash':
-            self.getFileHash(command_list)
+            hash = self.getFileHash(command_list)
+            return hash
 
         elif command_list[0] == 'FileDownload':
             self.FileDownload(command_list)
