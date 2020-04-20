@@ -2,6 +2,7 @@ import socket
 import config
 import os
 import helper_functions
+import hashlib
 
 class Client:
 
@@ -71,8 +72,12 @@ class Client:
 
 
 
-    def FileDownload(self, command_list):
-        path = self.file_storage_path+'/' + command_list[2]
+    def FileDownload(self, command_list, cache = 0):
+
+        if cache:
+            path = self.cache_directory_path+'/' + command_list[2]
+        else:    
+            path = self.file_storage_path+'/' + command_list[2]
         print (path)
         string_to_receive = "Requested file not present in server"
         string_received = self.receiveData()
@@ -134,89 +139,99 @@ class Client:
             print(string_to_display)
         
         if command_list[1].lower() == 'verify':
-            
+            download_flag = 1
             if os.path.exists(self.cache_directory_path + '/' + command_list[2]):
                 command = 'FileHash verify ' + command_list[2]
-                hash = self.decode_command(command)
+                hash_value = self.decode_command(command)
+                path = self.cache_directory_path + '/' + command_list[2]
+                hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
                 
-                print('File exists')
-
+                if hasher == hash_value:
+                
+                    print('File exists.')
+                    download_flag = 0
+                else: 
+                    print('File changed on server downloading again.')
+                    download_flag = 1
             
-            else:
+            if download_flag:
+
                 path = self.cache_directory_path + '/' + command_list[2]
                 command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
                 print (command)
-                self.client_socket.send(command.encode('utf-8'))
-                resp = self.receiveData()
-
-                with open(path,'wb') as filedown:
-                    while True:
-                        download = self.client_socket.recv(1024)
-                        filedown.write(download)
-                        if len(download) < 1024:
-                            break
-                    
-                filedown.close()
                 
-                print('File downloaded as it wasn\'t present in cache')
+                self.client_socket.send(command.encode('utf-8'))
+                command_list = helper_functions.string_split(command)
+                self.FileDownload(command_list, cache=1)
+                # resp = self.receiveData()
 
-        if command_list[1] == 'FileDownload':
-            files = os.scandir(self.cache_directory_path)
-
-            for entry in files:
-                # print (entry.name) 
-
-                file_cache_path = self.cache_directory_path + '/' + entry.name
-                path = self.file_storage_path + '/' + command_list[2] 
-                if self.getFileHash(file_cache_path) == self.getFileHash(path):
-                    # Check if file in cache 
-                    print ("First cond")
-                    print ("Requested file is present in cache. Downloading...")
+                # with open(path,'wb') as filedown:
+                #     while True:
+                #         download = self.client_socket.recv(1024)
+                #         filedown.write(download)
+                #         if len(download) < 1024:
+                #             break
                     
-                    command = 'Cache FileDownload ' + command_list[2].replace(' ', '\\ ')
-                    self.client_socket.send(command.encode('utf-8'))
-                    resp = self.receiveData()
-                    with open(path,'wb') as filedown:
-                        while True:
-                            download = self.client_socket.recv(1024)
-                            filedown.write(download)
-                            if len(download) < 1024:
-                                break
-                    filedown.close()
-                else:
-                    # code for when file is not present in cache, 
-                    # transfer to from server to cache
-                     
-                    path = self.cache_directory_path + '/' + command_list[2]
-                    print ("Requested file not present in cache. Downloading from server...")
-                    command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
-                    self.client_socket.send(command.encode('utf-8'))
-                    resp = self.receiveData()
-                    with open(path,'wb') as filedown:
-                        while True:
-                            download = self.client_socket.recv(1024)
-                            filedown.write(download)
-                            if len(download) < 1024:
-                                break
-                    filedown.close()
-                    # now transfer to file directory from cache
-                    file_cache_path = self.cache_directory_path + '/' + entry.name
-                    path = self.file_storage_path + '/' + command_list[2] 
-                    if self.getFileHash(file_cache_path) == self.getFileHash(path):
-                        print ("Requested file is present in cache. Downloading...")
-                        
-                        command = 'Cache FileDownload ' + command_list[2].replace(' ', '\\ ')
-                        self.client_socket.send(command.encode('utf-8'))
-                        resp = self.receiveData()
-                        with open(path,'wb') as filedown:
-                            while True:
-                                download = self.client_socket.recv(1024)
-                                filedown.write(download)
-                                if len(download) < 1024:
-                                    break
-                        filedown.close()
+                # filedown.close()
+                
+                # print('File downloaded as it wasn\'t present in cache')
 
-        pass
+        # if command_list[1] == 'FileDownload':
+        #     files = os.scandir(self.cache_directory_path)
+
+        #     for entry in files:
+        #         # print (entry.name) 
+
+        #         file_cache_path = self.cache_directory_path + '/' + entry.name
+        #         path = self.file_storage_path + '/' + command_list[2] 
+        #         if self.getFileHash(file_cache_path) == self.getFileHash(path):
+        #             # Check if file in cache 
+        #             print ("First cond")
+        #             print ("Requested file is present in cache. Downloading...")
+                    
+        #             command = 'Cache FileDownload ' + command_list[2].replace(' ', '\\ ')
+        #             self.client_socket.send(command.encode('utf-8'))
+        #             resp = self.receiveData()
+        #             with open(path,'wb') as filedown:
+        #                 while True:
+        #                     download = self.client_socket.recv(1024)
+        #                     filedown.write(download)
+        #                     if len(download) < 1024:
+        #                         break
+        #             filedown.close()
+        #         else:
+        #             # code for when file is not present in cache, 
+        #             # transfer to from server to cache
+                     
+        #             path = self.cache_directory_path + '/' + command_list[2]
+        #             print ("Requested file not present in cache. Downloading from server...")
+        #             command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
+        #             self.client_socket.send(command.encode('utf-8'))
+        #             resp = self.receiveData()
+        #             with open(path,'wb') as filedown:
+        #                 while True:
+        #                     download = self.client_socket.recv(1024)
+        #                     filedown.write(download)
+        #                     if len(download) < 1024:
+        #                         break
+        #             filedown.close()
+        #             # now transfer to file directory from cache
+        #             file_cache_path = self.cache_directory_path + '/' + entry.name
+        #             path = self.file_storage_path + '/' + command_list[2] 
+        #             if self.getFileHash(file_cache_path) == self.getFileHash(path):
+        #                 print ("Requested file is present in cache. Downloading...")
+                        
+        #                 command = 'Cache FileDownload ' + command_list[2].replace(' ', '\\ ')
+        #                 self.client_socket.send(command.encode('utf-8'))
+        #                 resp = self.receiveData()
+        #                 with open(path,'wb') as filedown:
+        #                     while True:
+        #                         download = self.client_socket.recv(1024)
+        #                         filedown.write(download)
+        #                         if len(download) < 1024:
+        #                             break
+        #                 filedown.close()
+        # pass
 
 
     def IndexGet(self, command_list):
