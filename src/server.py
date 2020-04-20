@@ -240,10 +240,14 @@ class Server:
 
         if arg == 'verify':
             arg_file = open(self.file_storage_path + '/' + filename, 'rb')
+            file_stats = os.stat(self.file_storage_path + '/' + filename)
+            size = file_stats.st_size
             hasher = hashlib.md5(arg_file.read()).hexdigest()
             print(filename + ' Hash: ' + hasher)
             
-            client_socket.send(hasher.encode('utf-8'))
+            return_value = 'Hash ' + hasher + ' size ' + str(size)
+            print(return_value)
+            client_socket.send(return_value.encode('utf-8'))
             pass
         
         elif arg == 'checkall':
