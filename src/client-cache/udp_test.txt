@@ -1,3 +1,0 @@
-Test file for the FileDownload() with UDP Flag
-Ajay Shrihari
-Rahul Sajnani
