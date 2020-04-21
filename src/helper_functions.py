@@ -1,12 +1,8 @@
 import re
 import os
-<<<<<<< HEAD
 
-=======
->>>>>>> 0b9cf7488b36638f1e2160099d2a13fc4132fb49
+
 def string_split(string_input):
-
-    '''
     Function to escape spaces with '\ ' and splitting strings correctly
     Input:
         string_input - input string
