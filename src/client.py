@@ -149,7 +149,7 @@ class Client:
                 else: 
                     print('File changed on server downloading again.')
                     download_flag = 1
-            
+            print (download_flag)
             if download_flag:
 
                 command = 'FileHash verify ' + command_list[2]
