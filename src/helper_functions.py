@@ -30,13 +30,15 @@ def clear_cache(path, size_to_add, cache_size):
     cache_directory_size = sum(os.path.getsize(f) for f in os.listdir(path) if os.path.isfile(f))
 
     print(cache_directory_size)
-    
+
     if size_to_add > cache_size:
-        print('File too bigger than cache')
+        print('File bigger than cache can not download')
         download_flag = 0
 
     elif size_to_add + cache_directory_size > cache_size:
         print('Deleting files to update cache')
+
+        
 
     return download_flag
         
