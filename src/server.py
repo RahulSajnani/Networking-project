@@ -239,28 +239,35 @@ class Server:
         '''
 
         if arg == 'verify':
-            arg_file = open(self.file_storage_path + '/' + filename, 'rb')
-            file_stats = os.stat(self.file_storage_path + '/' + filename)
-            size = file_stats.st_size
-            hasher = hashlib.md5(arg_file.read()).hexdigest()
-            print(filename + ' Hash: ' + hasher)
+
+            if os.path.isfile(self.file_storage_path + '/' + filename):
+                arg_file = open(self.file_storage_path + '/' + filename, 'rb')
+                file_stats = os.stat(self.file_storage_path + '/' + filename)
+                size = file_stats.st_size
+                hasher = hashlib.md5(arg_file.read()).hexdigest()
+                print(filename + ' Hash: ' + hasher)
+                
+                return_value = 'Hash ' + hasher + ' size ' + str(size)
+                print(return_value)
+                client_socket.send(return_value.encode('utf-8'))
             
-            return_value = 'Hash ' + hasher + ' size ' + str(size)
-            print(return_value)
-            client_socket.send(return_value.encode('utf-8'))
-            pass
-        
+            else:
+                
+                return_value = '0'
+                client_socket.send(return_value.encode('utf-8'))
+            
+
         elif arg == 'checkall':
             
-            string_to_send = ''
+            return_value = ''
             for file_name in os.listdir(self.file_storage_path):
                 
                 file_ptr = open(self.file_storage_path + '/' + file_name, 'rb')
                 hasher = hashlib.md5(file_ptr.read()).hexdigest()
-                string_to_send = string_to_send + file_name + ' hash value: ' + hasher + '\n'
+                return_value = return_value + file_name + ' hash value: ' + hasher + '\n'
             
             
-            client_socket.send(string_to_send.encode('utf-8'))
+            client_socket.send(return_value.encode('utf-8'))
 
                 
             pass

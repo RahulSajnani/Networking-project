@@ -17,7 +17,7 @@ class Client:
         self.udp_port = 6000
         self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
         
-        self.cache_size = 10 * 1024 * 1024 * 1024
+        self.cache_size = 3 * 1024 * 1024   
 
     def authenticate(self):
         
@@ -54,13 +54,20 @@ class Client:
         
         if command_list[1] == 'verify':    
             hash_value = self.client_socket.recv(1024)
+            print('Hash val return: ' + str(hash_value) )
             hash_value = hash_value.decode('utf-8')
             hash_value_split = helper_functions.string_split(hash_value)
-            hash_value = hash_value_split[1]
-            size_file = int(hash_value_split[3])
-            print(command_list[2] + ' file hash: ' + hash_value + ' size ' + str(size_file))
-            return hash_value, size_file
-        
+            
+            if len(hash_value_split) == 1:
+                # file does not exist
+                print('Requested file not present on server.')
+                return 0, 0
+            else:
+                hash_value = hash_value_split[1]
+                size_file = int(hash_value_split[3])
+                print(command_list[2] + ' file hash: ' + hash_value + ' size ' + str(size_file))
+                return hash_value, size_file
+            
         elif command_list[1] == 'checkall':
 
             info_string = self.receiveData()
@@ -77,6 +84,7 @@ class Client:
         else:    
             path = self.file_storage_path+'/' + command_list[2]
         print (path)
+        
         string_to_receive = "Requested file not present in server"
         string_received = self.receiveData()
         
@@ -86,6 +94,7 @@ class Client:
         else:
             print (string_received)
             if command_list[1] == 'tcp' or command_list[1] == 'TCP':
+                
                 with open(path,'wb') as filedown:
                     while True:
                         download = self.client_socket.recv(1024)
@@ -117,6 +126,13 @@ class Client:
 
 
     def Cache(self, command_list):
+        '''
+        Cache command
+        Input :
+            command_list - list object - contains command separated at spaces
+        Return :
+            None
+        '''
 
         if command_list[1].lower() == 'show':
 
@@ -136,31 +152,36 @@ class Client:
         
         if command_list[1].lower() == 'verify':
             download_flag = 1
-            if os.path.exists(self.cache_directory_path + '/' + command_list[2]):
-                command = 'FileHash verify ' + command_list[2]
+            path = self.cache_directory_path + '/' + command_list[2]
+            if os.path.exists(path):
+                command = 'FileHash verify ' + command_list[2].replace(' ', '\\ ')
                 hash_value, size = self.decode_command(command)
-                path = self.cache_directory_path + '/' + command_list[2]
+                
                 hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
                 
-                if hasher == hash_value:
-                
+
+                if hash_value == 0 and size == 0:
+                    download_flag = 0
+                    return 0 
+
+                elif hasher == hash_value:
                     print('File exists.')
                     download_flag = 0
                 else: 
                     print('File changed on server downloading again.')
                     download_flag = 1
-            print (download_flag)
+            
+
             if download_flag:
-                
-                
                 
                 command = 'FileHash verify ' + command_list[2]
                 hash_value, size = self.decode_command(command)
-                
+                if hash_value == 0 and size == 0:
+                    return 0
+
                 download_flag = helper_functions.clear_cache( self.cache_directory_path, size, self.cache_size)
                 
                 if download_flag:
-                    path = self.cache_directory_path + '/' + command_list[2]
                     command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
                     print (command)    
                     self.client_socket.send(command.encode('utf-8'))
@@ -186,6 +207,7 @@ class Client:
             self.client_socket.send(command.encode('utf-8'))
 
         if command_list[0] == 'FileHash':
+            
             hash, size = self.getFileHash(command_list)
             return hash, size
 
@@ -200,7 +222,7 @@ class Client:
 
         elif command_list[0] == 'quit':
             self.connection = False
-        pass
+
     
     def run(self):
 
@@ -212,8 +234,6 @@ class Client:
             command = input('$>')
             self.decode_command(command)
             
-            
-        pass
 
 
 if __name__ == "__main__":
