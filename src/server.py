@@ -8,6 +8,7 @@ import hashlib
 import os
 import time
 import helper_functions
+import tqdm
 from datetime import datetime, date
 
 '''
@@ -148,9 +149,7 @@ class Server:
         ###########
         ## CHECK IF FILE EXISTS FIRST!!!!! 
 
-        if command_list[0] == 'Cache':
-            path = self.cache_directory_path + '/' + command_list[2]
-            arg = 'tcp'
+
         if command_list[0] == 'FileDownload':
             path = self.file_storage_path+'/'+ command_list[2]
             arg = command_list[1]
@@ -167,14 +166,22 @@ class Server:
             string_to_send = "Requested file has been found"
             print (string_to_send)
             client_socket.send(string_to_send.encode('utf-8'))
-        
+
+            file_stats = os.stat(path)
+            size = file_stats.st_size
+
+            string_to_send = "Filesize: " + str(size)
+            client_socket.send(string_to_send.encode('utf-8'))
+            print(string_to_send)
+            time.sleep(0.2)
+            
             if arg == 'tcp' or arg == 'TCP':
                 file = open(path, 'rb')
-                reading = file.read(1024)
+                reading = file.read(config.BUFFER_SIZE)
                 # print (reading)
                 while (reading):
                     client_socket.send(reading)
-                    reading = file.read(1024)
+                    reading = file.read(config.BUFFER_SIZE)
 
                     # print (reading)
                 file_stats = os.stat(path)
@@ -201,13 +208,13 @@ class Server:
                 # client_socket.sendto(b'filename',(self.host, self.udp_port))
                 # print ('Host',client_ip)
                 # print ('Port', self.udp_port)
-                reading = file.read(1024)
+                reading = file.read(config.BUFFER_SIZE)
 
                 while(True):
                     if (client_udp_socket.sendto(reading,(client_ip, self.udp_port))):
-                        reading = file.read(1024)
+                        reading = file.read(config.BUFFER_SIZE)
 
-                    if len(reading) < 1024:
+                    if len(reading) < config.BUFFER_SIZE:
                         break
 
                 file_stats = os.stat(path)
@@ -287,7 +294,7 @@ class Server:
         client_loop = True
         while client_loop:
 
-            command = client_socket.recv(1024)
+            command = client_socket.recv(config.BUFFER_SIZE)
             
             if command == b'':
                 client_loop = False
@@ -309,12 +316,6 @@ class Server:
 
             elif command_list[0] == 'FileDownload':
                 self.sendFile(client_socket, command_list)
-
-            elif command_list[0] == 'Cache' and command_list[1] == 'FileDownload':
-                self.sendFile(client_socket, command_list)
-                command = client_socket.recv(1024)
-                command = command.decode('utf-8')
-
 
             elif command_list[0] == 'IndexGet':
 
@@ -355,14 +356,17 @@ class Server:
             # Accepting connection with client
             
             client_socket, client_ip  = self.server_socket.accept()
-                
+            
+
             if client_socket not in self.authenticated_clients:
                 auth = self.authenticate(client_socket)
                 if auth == 0:
                     client_socket.close()
-                else:
+                elif client_socket is not None:
                     self.authenticated_clients.append(client_socket)
                     print(str(client_ip))
+                    
+                    # client_socket.settimeout(1)
                     self.client_session(client_socket)
                 
                         
