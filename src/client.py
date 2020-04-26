@@ -76,12 +76,12 @@ class Client:
             info_string = self.receiveData()
 
             print(info_string)   
-            return 0 
+            return 0, 0 
 
         else:
             info_string = self.receiveData()
             print(info_string)   
-            return 0 
+            return 0, 0
 
 
     def FileDownload(self, command_list, cache = 0):

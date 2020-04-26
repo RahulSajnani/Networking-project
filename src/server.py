@@ -317,7 +317,9 @@ class Server:
             
             command_list = helper_functions.string_split(command)
             print(command_list)
-
+            if len(command_list) == 1:
+                continue
+            
             if command_list[0] == 'FileHash':
 
                 if command_list[1] == 'verify':
