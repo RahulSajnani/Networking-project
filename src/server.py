@@ -51,7 +51,7 @@ class Server:
 
     def displayFiles(self, client_socket, command_list):
         '''
-        Function to display files present in server.
+        Function to display files present in server. INDEXGET command
         Output: List of Files
         TODO:
             - Get the files from folder with the files
@@ -150,17 +150,31 @@ class Server:
         ## CHECK IF FILE EXISTS FIRST!!!!! 
 
 
+        if len(command_list) == 1:
+            string_to_send = 'Command error. Usage: FileDownload tcp/udp <filename>'
+            client_socket.send(string_to_send.encode('utf-8'))
+            return None
+        
+        
+         
+        if command_list[1].lower() != 'udp' and command_list[1].lower() != 'tcp':
+            print('arg error')
+            string_to_send = 'Command error. Usage: FileDownload tcp/udp <filename>'
+            client_socket.send(string_to_send.encode('utf-8'))
+            return None
+
         if command_list[0] == 'FileDownload':
             path = self.file_storage_path+'/'+ command_list[2]
+            
             arg = command_list[1]
+
         string_to_send = "Requested file not present in server"
         filename = command_list[2]
-         
-            
+        
+
         if not os.path.isfile(path):
             print (string_to_send)
             client_socket.send(string_to_send.encode('utf-8'))
-            pass
 
         else:
             string_to_send = "Requested file has been found"
@@ -173,7 +187,7 @@ class Server:
             string_to_send = "Filesize: " + str(size)
             client_socket.send(string_to_send.encode('utf-8'))
             print(string_to_send)
-            time.sleep(0.2)
+            time.sleep(1)
             
             if arg == 'tcp' or arg == 'TCP':
                 file = open(path, 'rb')
@@ -210,12 +224,12 @@ class Server:
                 # print ('Port', self.udp_port)
                 reading = file.read(config.BUFFER_SIZE)
 
-                while(True):
+                while(reading):
                     if (client_udp_socket.sendto(reading,(client_ip, self.udp_port))):
                         reading = file.read(config.BUFFER_SIZE)
 
-                    if len(reading) < config.BUFFER_SIZE:
-                        break
+                    # if len(reading) < config.BUFFER_SIZE:
+                    #     break
 
                 file_stats = os.stat(path)
                 file_mtime = time.localtime(os.path.getmtime(path))
@@ -245,7 +259,7 @@ class Server:
             None
         '''
 
-        if arg == 'verify':
+        if arg.lower() == 'verify':
 
             if os.path.isfile(self.file_storage_path + '/' + filename):
                 arg_file = open(self.file_storage_path + '/' + filename, 'rb')
@@ -264,7 +278,7 @@ class Server:
                 client_socket.send(return_value.encode('utf-8'))
             
 
-        elif arg == 'checkall':
+        elif arg.lower() == 'checkall':
             
             return_value = ''
             for file_name in os.listdir(self.file_storage_path):
@@ -276,11 +290,10 @@ class Server:
             
             client_socket.send(return_value.encode('utf-8'))
 
-                
-            pass
-        
-
-        pass
+        else:
+            return_value = "Command error. Usage: FileHash verify <filename>\n FileHash checkall"
+            client_socket.send(return_value.encode('utf-8'))
+     
 
     def client_session(self, client_socket):
         '''
@@ -366,9 +379,14 @@ class Server:
                     self.authenticated_clients.append(client_socket)
                     print(str(client_ip))
                     
-                    # client_socket.settimeout(1)
+                    # client_socket.settimeout(config.SOCKET_TIMEOUT)
+                    # try:
                     self.client_session(client_socket)
-                
+                    # except:
+                    #     print ('client socket timeout')
+                    #     client_socket.close()
+
+                    
                         
                         
 

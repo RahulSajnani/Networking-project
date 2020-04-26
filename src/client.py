@@ -10,6 +10,7 @@ class Client:
     def __init__(self):
 
         self.client_socket = socket.socket()
+        # self.client_socket.settimeout(config.SOCKET_TIMEOUT)
         self.host_ip = ''
         self.port_number = 13000
         self.connection = False
@@ -44,7 +45,7 @@ class Client:
         while True:
             
             info = self.client_socket.recv(config.BUFFER_SIZE)
-            print(info)
+            # print(info)
             info_string = info_string + info.decode('utf-8')
             if len(info) < config.BUFFER_SIZE:
                 break    
@@ -54,9 +55,9 @@ class Client:
     def getFileHash(self, command_list):
         
         
-        if command_list[1] == 'verify':    
+        if command_list[1].lower() == 'verify':    
             hash_value = self.client_socket.recv(config.BUFFER_SIZE)
-            print('Hash val return: ' + str(hash_value) )
+            
             hash_value = hash_value.decode('utf-8')
             hash_value_split = helper_functions.string_split(hash_value)
             
@@ -66,37 +67,52 @@ class Client:
                 return 0, 0
             else:
                 hash_value = hash_value_split[1]
+                print('Hash val return: ' + str(hash_value))
                 size_file = int(hash_value_split[3])
                 print(command_list[2] + ' file hash: ' + hash_value + ' size ' + str(size_file))
                 return hash_value, size_file
             
-        elif command_list[1] == 'checkall':
-
+        elif command_list[1].lower() == 'checkall':
             info_string = self.receiveData()
 
             print(info_string)   
             return 0 
 
+        else:
+            info_string = self.receiveData()
+            print(info_string)   
+            return 0 
 
 
     def FileDownload(self, command_list, cache = 0):
 
-        if cache:
-            path = self.cache_directory_path+'/' + command_list[2]
-        else:    
-            path = self.file_storage_path+'/' + command_list[2]
-        print (path)
+        
         
         string_to_receive = "Requested file not present in server"
+        error_message = "Command error. Usage: FileDownload tcp/udp <filename>"
         string_received = self.receiveData()
         
-        if string_received == string_to_receive:
+
+        if string_received == string_to_receive or string_received == error_message:
             print (string_received)
             return None 
-        else:
-            print (string_received)
+        elif len(command_list) == 1:
+            print(error_message)
+            return None
+            
+        elif command_list[1].lower() == 'udp' or command_list[1].lower() == 'tcp':
+            
             string_received = self.receiveData()
-
+            if cache:
+                path = self.cache_directory_path+'/' + command_list[2]
+            else:    
+                path = self.file_storage_path+'/' + command_list[2]
+            print (path)
+            
+            # print (string_received)
+            
+            # string_received = self.receiveData()
+            print(string_received)
             size = helper_functions.string_split(string_received)[-1]
             size = int(size)
             print(size)
@@ -148,6 +164,10 @@ class Client:
             None
         '''
 
+        if len(command_list) == 1:
+            print('Command error. Usage :\nCache verify <filename>\nCache show')
+            return None
+
         if command_list[1].lower() == 'show':
 
             files = os.scandir(self.cache_directory_path)
@@ -164,7 +184,7 @@ class Client:
             
             print(string_to_display)
         
-        if command_list[1].lower() == 'verify':
+        elif command_list[1].lower() == 'verify':
             download_flag = 1
             path = self.cache_directory_path + '/' + command_list[2]
             if os.path.exists(path):
@@ -201,6 +221,10 @@ class Client:
                     self.client_socket.send(command.encode('utf-8'))
                     command_list = helper_functions.string_split(command)
                     self.FileDownload(command_list, cache=1)
+        else:
+            print('Command error. Usage :\nCache verify <filename>\nCache show')
+            return None
+
 
     def IndexGet(self, command_list):
 
@@ -236,6 +260,9 @@ class Client:
 
         elif command_list[0] == 'quit':
             self.connection = False
+        
+        else: 
+            print('Incorrect command')
 
     
     def run(self):
@@ -244,10 +271,12 @@ class Client:
         self.authenticate()
         
         while self.connection:
-
-            command = input('$>')
-            self.decode_command(command)
-            
+            try:
+                command = input('$>')
+                self.decode_command(command)
+            except socket.timeout:
+                print("Socket timed out.")
+                self.connection = False
 
 
 if __name__ == "__main__":
