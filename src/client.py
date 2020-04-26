@@ -3,6 +3,7 @@ import config
 import os
 import helper_functions
 import hashlib
+import tqdm
 
 class Client:
 
@@ -17,17 +18,17 @@ class Client:
         self.udp_port = 6000
         self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
         
-        self.cache_size = 3 * 1024 * 1024   
+        self.cache_size = 3 * 1024 * 1024
 
     def authenticate(self):
         
         self.client_socket.connect((self.host_ip, self.port_number))
-        msg = self.client_socket.recv(1024)
+        msg = self.client_socket.recv(config.BUFFER_SIZE)
 
         # password = input(msg.decode('utf-8') + '\n')
         password = config.PASSWORD
         self.client_socket.send(password.encode('utf-8'))
-        reply = self.client_socket.recv(1024)
+        reply = self.client_socket.recv(config.BUFFER_SIZE)
 
         if reply.decode('utf-8') == '1':
             print('Authenticated. Welcome!')
@@ -42,9 +43,10 @@ class Client:
             
         while True:
             
-            info = self.client_socket.recv(1024)
+            info = self.client_socket.recv(config.BUFFER_SIZE)
+            print(info)
             info_string = info_string + info.decode('utf-8')
-            if len(info) < 1024:
+            if len(info) < config.BUFFER_SIZE:
                 break    
 
         return info_string
@@ -53,7 +55,7 @@ class Client:
         
         
         if command_list[1] == 'verify':    
-            hash_value = self.client_socket.recv(1024)
+            hash_value = self.client_socket.recv(config.BUFFER_SIZE)
             print('Hash val return: ' + str(hash_value) )
             hash_value = hash_value.decode('utf-8')
             hash_value_split = helper_functions.string_split(hash_value)
@@ -93,14 +95,25 @@ class Client:
             return None 
         else:
             print (string_received)
+            string_received = self.receiveData()
+
+            size = helper_functions.string_split(string_received)[-1]
+            size = int(size)
+            print(size)
+
+            progress = tqdm.tqdm(range(size), f"Receiving ", unit="B", unit_scale=True, unit_divisor=config.BUFFER_SIZE)
+
             if command_list[1] == 'tcp' or command_list[1] == 'TCP':
+                
                 
                 with open(path,'wb') as filedown:
                     while True:
-                        download = self.client_socket.recv(1024)
-                        filedown.write(download)
-                        if len(download) < 1024:
+                        download = self.client_socket.recv(config.BUFFER_SIZE)
+                        if len(download) < config.BUFFER_SIZE:
+                        # if not download:
                             break
+                        filedown.write(download)
+                        progress.update(len(download))
                         
                 filedown.close()
             # self.client_socket.close()
@@ -113,13 +126,14 @@ class Client:
                 # print ("Host", client_ip)
                 # print ("Port", self.udp_port)
                 udp_socket.bind((client_ip,self.udp_port))
-                download, address = udp_socket.recvfrom(1024)
+                download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                 filedown = open(path,'wb')
                 try:
                     while(download):
                         filedown.write(download)
-                        udp_socket.settimeout(2)
-                        download, address = udp_socket.recvfrom(1024)
+                        udp_socket.settimeout(5)
+                        download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
+                        progress.update(len(download))
                 except socket.timeout:
                     filedown.close()
                     udp_socket.close()
