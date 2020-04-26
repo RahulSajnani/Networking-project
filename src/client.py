@@ -2,7 +2,7 @@ import socket
 import config
 import os
 import helper_functions
-import hashlib
+import filehash
 import tqdm
 
 class Client:
@@ -90,7 +90,9 @@ class Client:
         
         string_to_receive = "Requested file not present in server"
         error_message = "Command error. Usage: FileDownload tcp/udp <filename>"
-        string_received = self.receiveData()
+        
+        info = self.client_socket.recv(config.BUFFER_SIZE)
+        string_received = info.decode('utf-8')
         
 
         if string_received == string_to_receive or string_received == error_message:
@@ -102,17 +104,11 @@ class Client:
             
         elif command_list[1].lower() == 'udp' or command_list[1].lower() == 'tcp':
             
-            string_received = self.receiveData()
             if cache:
                 path = self.cache_directory_path+'/' + command_list[2]
             else:    
                 path = self.file_storage_path+'/' + command_list[2]
-            print (path)
             
-            # print (string_received)
-            
-            # string_received = self.receiveData()
-            print(string_received)
             size = helper_functions.string_split(string_received)[-1]
             size = int(size)
             print(size)
@@ -125,10 +121,11 @@ class Client:
                 with open(path,'wb') as filedown:
                     while True:
                         download = self.client_socket.recv(config.BUFFER_SIZE)
+                        filedown.write(download)
                         if len(download) < config.BUFFER_SIZE:
                         # if not download:
                             break
-                        filedown.write(download)
+                        
                         progress.update(len(download))
                         
                 filedown.close()
@@ -188,10 +185,15 @@ class Client:
             download_flag = 1
             path = self.cache_directory_path + '/' + command_list[2]
             if os.path.exists(path):
+                # hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
+                hasher = filehash.FileHash('md5')
+                hasher = hasher.hash_file(path)
                 command = 'FileHash verify ' + command_list[2].replace(' ', '\\ ')
                 hash_value, size = self.decode_command(command)
                 
-                hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
+                
+                print(hash_value)
+                print(hasher)
                 
 
                 if hash_value == 0 and size == 0:
@@ -210,6 +212,7 @@ class Client:
                 
                 command = 'FileHash verify ' + command_list[2]
                 hash_value, size = self.decode_command(command)
+                print(hash_value+'download')
                 if hash_value == 0 and size == 0:
                     return 0
 

@@ -4,7 +4,8 @@ from _thread import *
 import threading
 import sys
 import config
-import hashlib
+# import hashlib
+import filehash
 import os
 import time
 import helper_functions
@@ -177,17 +178,15 @@ class Server:
             client_socket.send(string_to_send.encode('utf-8'))
 
         else:
-            string_to_send = "Requested file has been found"
-            print (string_to_send)
-            client_socket.send(string_to_send.encode('utf-8'))
 
             file_stats = os.stat(path)
             size = file_stats.st_size
-
-            string_to_send = "Filesize: " + str(size)
+            
+            string_to_send = "Requested file has been found. Filesize: " + str(size) 
+            print (string_to_send)
             client_socket.send(string_to_send.encode('utf-8'))
-            print(string_to_send)
-            time.sleep(1)
+
+            time.sleep(0.1)
             
             if arg == 'tcp' or arg == 'TCP':
                 file = open(path, 'rb')
@@ -202,7 +201,9 @@ class Server:
                 file_mtime = time.localtime(os.path.getmtime(path))
                 file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
                 file.close()
-                hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
+                # hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
+                hasher = filehash.FileHash('md5')
+                hasher = hasher.hash_file(path)
                 print ("Sending...")
                 print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
             
@@ -234,7 +235,9 @@ class Server:
                 file_stats = os.stat(path)
                 file_mtime = time.localtime(os.path.getmtime(path))
                 file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime)
-                hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
+                # hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
+                hasher = filehash.FileHash('md5')
+                hasher = hasher.hash_file(path)
                 print ("Sending...")
                 print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
                 file.close()
@@ -265,7 +268,9 @@ class Server:
                 arg_file = open(self.file_storage_path + '/' + filename, 'rb')
                 file_stats = os.stat(self.file_storage_path + '/' + filename)
                 size = file_stats.st_size
-                hasher = hashlib.md5(arg_file.read()).hexdigest()
+                # hasher = hashlib.md5(arg_file.read()).hexdigest()
+                hasher = filehash.FileHash('md5')
+                hasher = hasher.hash_file(self.file_storage_path + '/' + filename)
                 print(filename + ' Hash: ' + hasher)
                 
                 return_value = 'Hash ' + hasher + ' size ' + str(size)
@@ -283,8 +288,10 @@ class Server:
             return_value = ''
             for file_name in os.listdir(self.file_storage_path):
                 
-                file_ptr = open(self.file_storage_path + '/' + file_name, 'rb')
-                hasher = hashlib.md5(file_ptr.read()).hexdigest()
+                # file_ptr = open(self.file_storage_path + '/' + file_name, 'rb')
+                # hasher = hashlib.md5(file_ptr.read()).hexdigest()
+                hasher = filehash.FileHash('md5')
+                hasher = hasher.hash_file(self.file_storage_path + '/' + file_name)
                 return_value = return_value + file_name + ' hash value: ' + hasher + '\n'
             
             
@@ -319,7 +326,7 @@ class Server:
             print(command_list)
             if len(command_list) == 1:
                 continue
-            
+
             if command_list[0] == 'FileHash':
 
                 if command_list[1] == 'verify':

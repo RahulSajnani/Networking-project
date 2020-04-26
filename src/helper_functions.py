@@ -90,11 +90,6 @@ def clear_cache(path, size_to_add, cache_size):
     return download_flag
 
 
+# def get_file_hash(path):
 
 
-
-# cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
-# delete_file(cache_directory_path+"/cache_test.txt")
-# print (directory_size(cache_directory_path))
-
-# print (os.path.getsize(cache_testhe_directory_path+"/cache_test.txt"))
