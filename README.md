@@ -72,6 +72,8 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 	- Method for authenticating a user using a password has been implemented
 	- If the password is correct, the prompt for using the aforementioned functions is shown.
 
+Note: For filenames with spaces, a helper function has been written to replace the spaces with "\" for ease of use.  
+
 Contributors
 - Rahul Sajnani
 - Ajay Shrihari
