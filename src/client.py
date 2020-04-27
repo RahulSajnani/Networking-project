@@ -4,6 +4,7 @@ import os
 import helper_functions
 import filehash
 import tqdm
+import readline
 
 class Client:
 
@@ -11,6 +12,7 @@ class Client:
 
         self.client_socket = socket.socket()
         # self.client_socket.settimeout(config.SOCKET_TIMEOUT)
+        self.history_file = './history.log'
         self.host_ip = ''
         self.port_number = 13000
         self.connection = False
@@ -273,9 +275,18 @@ class Client:
         # Authenticates client
         self.authenticate()
         
+        if not os.path.exists(self.history_file):
+            open(self.history_file, 'a').close()
+        
+        readline.clear_history()
+        readline.set_history_length(100)
+        # readline.write_history_file(self.history_file)
+
         while self.connection:
             try:
                 command = input('$>')
+                # readline.add_history(command)
+                readline.write_history_file(self.history_file)
                 self.decode_command(command)
             except socket.timeout:
                 print("Socket timed out.")
