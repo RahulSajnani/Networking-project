@@ -57,54 +57,54 @@ class Client:
     def getFileHash(self, command_list):
         
         
-        if command_list[1].lower() == 'verify':    
-            hash_value = self.client_socket.recv(config.BUFFER_SIZE)
-            
-            hash_value = hash_value.decode('utf-8')
-            hash_value_split = helper_functions.string_split(hash_value)
-            
-            if len(hash_value_split) == 1:
-                # file does not exist
-                print('Requested file not present on server.')
-                return 0, 0
-            else:
-                hash_value = hash_value_split[1]
-                print('Hash val return: ' + str(hash_value))
-                size_file = int(hash_value_split[3])
-                print(command_list[2] + ' file hash: ' + hash_value + ' size ' + str(size_file))
-                return hash_value, size_file
-            
-        elif command_list[1].lower() == 'checkall':
-            info_string = self.receiveData()
+        if len(command_list) == 3 or len(command_list) == 2:
+            if command_list[1].lower() == 'verify':    
+                hash_value = self.client_socket.recv(config.BUFFER_SIZE)
+                
+                hash_value = hash_value.decode('utf-8')
+                
+                hash_value_split = helper_functions.string_split(hash_value)
+                
+                if len(hash_value_split) == 1:
+                    # file does not exist
+                    print('Requested file not present on server.')
+                    return 0, 0
+                else:
+                    print(hash_value)
+                    hash_value = hash_value_split[1]
+                    size_file = int(hash_value_split[3])
+                    return hash_value, size_file
+                
+            elif command_list[1].lower() == 'checkall':
+                info_string = self.receiveData()
+                print(info_string)   
+                return 0, 0 
 
-            print(info_string)   
-            return 0, 0 
-
-        else:
-            info_string = self.receiveData()
-            print(info_string)   
-            return 0, 0
-
+        
+        info_string = self.receiveData()
+        print(info_string)   
+        return 0, 0
 
     def FileDownload(self, command_list, cache = 0):
 
-        
-        
-        string_to_receive = "Requested file not present in server"
-        error_message = "Command error. Usage: FileDownload tcp/udp <filename>"
-        
-        info = self.client_socket.recv(config.BUFFER_SIZE)
-        string_received = info.decode('utf-8')
-        
 
-        if string_received == string_to_receive or string_received == error_message:
-            print (string_received)
-            return None 
-        elif len(command_list) == 1:
-            print(error_message)
-            return None
+        if len(command_list) != 3:
             
-        elif command_list[1].lower() == 'udp' or command_list[1].lower() == 'tcp':
+            error_message = "Command error. Usage: FileDownload tcp/udp <filename>"
+            info = self.client_socket.recv(config.BUFFER_SIZE)
+            string_received = info.decode('utf-8')
+            print(string_received)
+        
+            
+        elif (command_list[1].lower() == 'udp' or command_list[1].lower() == 'tcp'):
+            
+            string_to_receive = "Requested file not present in server"
+            info = self.client_socket.recv(config.BUFFER_SIZE)
+            string_received = info.decode('utf-8')
+
+            if string_received == string_to_receive:
+                print (string_received)
+                return None 
             
             print (string_received)
             if cache:
@@ -117,9 +117,7 @@ class Client:
             print(size)
 
             progress = tqdm.tqdm(range(size), f"Receiving ", unit="B", unit_scale=True, unit_divisor=config.BUFFER_SIZE)
-
             if command_list[1] == 'tcp' or command_list[1] == 'TCP':
-                
                 
                 with open(path,'wb') as filedown:
                     while True:
@@ -132,29 +130,28 @@ class Client:
                         progress.update(len(download))
                         
                 filedown.close()
-            # self.client_socket.close()
+
             elif command_list[1] == 'udp' or command_list[1] == 'UDP':
                 udp_socket = ''
                 if udp_socket != '':
                     udp_socket.close()
                 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 client_ip = self.client_socket.getsockname()[0]
-                # print ("Host", client_ip)
-                # print ("Port", self.udp_port)
+
                 udp_socket.bind((client_ip,self.udp_port))
                 download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                 filedown = open(path,'wb')
                 try:
                     while(download):
                         filedown.write(download)
-                        udp_socket.settimeout(5)
+                        udp_socket.settimeout(2)
                         download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                         progress.update(len(download))
+                
                 except socket.timeout:
                     filedown.close()
                     udp_socket.close()
-
-
+                                   
     def Cache(self, command_list):
         '''
         Cache command
@@ -227,9 +224,9 @@ class Client:
             print('Command error. Usage :\nCache verify <filename>\nCache show')
             return None
 
-
     def IndexGet(self, command_list):
-
+        
+        # if len(command_list) == 3:    
         string_to_print = ''
         string_to_print = self.receiveData()
         
@@ -237,7 +234,6 @@ class Client:
             print('No files to show')
         else:
             print(string_to_print)
-
 
     def decode_command(self, command):
 
@@ -247,14 +243,16 @@ class Client:
             self.client_socket.send(command.encode('utf-8'))
 
         if command_list[0] == 'FileHash':
-            
+            # error handling done
             hash, size = self.getFileHash(command_list)
             return hash, size
 
         elif command_list[0] == 'FileDownload':
+            # error handling done
             self.FileDownload(command_list)
             
         elif command_list[0] == 'IndexGet':
+            #
             self.IndexGet(command_list)  
 
         elif command_list[0] == 'Cache':
@@ -265,7 +263,6 @@ class Client:
         
         else: 
             print('Incorrect command')
-
     
     def run(self):
 
@@ -277,18 +274,22 @@ class Client:
         
         readline.clear_history()
         readline.set_history_length(100)
-        # readline.write_history_file(self.history_file)
 
         while self.connection:
             try:
-                command = input('$>')
-                # readline.add_history(command)
+                command = input('\n$>')
                 readline.write_history_file(self.history_file)
                 self.decode_command(command)
-            except socket.timeout:
-                print("Socket timed out.")
-                self.connection = False
 
+            except socket.error:
+
+                self.connection = False
+                print('Socket timeout')
+            
+            except:
+                self.connection = False
+                print('Internal error')
+            
 
 if __name__ == "__main__":
     
