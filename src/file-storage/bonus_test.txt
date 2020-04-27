@@ -1,0 +1,6 @@
+File for testing bonus question in indexGet
+Ajay is a good Programmer
+Rahul is a good Programmer
+
+
+Code by Ajay and Rahul

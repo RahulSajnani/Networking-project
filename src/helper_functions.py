@@ -1,6 +1,7 @@
 import re
 import os
 import time
+import config
 
 
 
@@ -90,11 +91,34 @@ def clear_cache(path, size_to_add, cache_size):
     return download_flag
 
 
+# def get_file_hash(path):
 
+def string_search_txt(filename, string_to_search):
+    '''
+    Input:
+        filename - relative file path
+        string_to_search - files containing this string will be returned
+    Returns:
+        1 if txt file has the word string_to_search
+        0 otherwise
+    '''
+    if filename[-4:] == ".txt":
+        
+        with open(filename) as file:    
+            file_text = file.read(config.BUFFER_SIZE)
 
+            while file_text:
 
-# cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
-# delete_file(cache_directory_path+"/cache_test.txt")
-# print (directory_size(cache_directory_path))
+                if string_to_search in file_text:
+                    # print ("yes")
+                    return 1
+                else:
+                    file_text = file.read(config.BUFFER_SIZE)
+            
+            return 0
+    else:
+        print ("File is not a txt file")
 
-# print (os.path.getsize(cache_testhe_directory_path+"/cache_test.txt"))
+## testing helper functions
+# file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
+# string_search_txt(file_storage_path+"/bonus_test.txt")
