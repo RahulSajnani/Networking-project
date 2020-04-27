@@ -25,10 +25,9 @@ Project 2: File server
 ### Overview
 A P2P file sharing protocol, with functionalities like download and upload for files and indexed searching. The client has the ability know the files present on the designated shared server folder. File transfer incorporates MD5 checksum.
 
-![picture alt]("http:https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTRqFw2lRmiy1mlYgjaXyIHu6XjKcvl83KcQHH1mG09fyIYgYys&usqp=CAU200x150 "P2P file sharing-Client-server network model")
 
 ### Implemented functions:
-**1. IndexGet flag(args)**
+1. IndexGet flag(args)
 	- This allows the client to request the display of shared files on the server.
 	- The history of requests is maintained on the client side.
 	- flag shortlist
@@ -41,7 +40,7 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 	- flag bonus
 		- This flag allows for the client to view the listing of the files on the server containing a specific word in the .txt files
 
-**2. FileHash flag(args)**
+2. FileHash flag(args)
 	- This command allows the client to check if any files on the shared server have been changed. 
 	- flag verify
 		- This flag allows for the client to check if a particular filename is present
@@ -50,7 +49,7 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 		- This flag allows the client to check if all the status of all files present on the server
 		- Returns the filename, checksum, and last modified timestamp of all files present in the shared server folder.
 
-**3. FileDownload flag(args)**
+3. FileDownload flag(args)
 	- This command allows the client to download files from the shared server folder.
 	- A progress bar is printed showing the status of the download.
 	- Outputs the filename, filesize, last modified timestamp and MD5hash of the file requested for download.
@@ -61,7 +60,7 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 		- Allows the client to download files to its file storage using the UDP protocol
 		- A UDP datagram socket is created for this purpose
 
-**4. Caching flag(args)**
+4. Caching flag(args)
 	- This command checks if the the requested file is already cached. If true, returns file from the cache without contacting the server.
 		- flag show
 			Checks and prints all elements of the cache and their sizes
@@ -69,11 +68,11 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 			- Checks if file is present in cache. If file is present, the Md5 hash of the file in the cache and the server are verified. If they are the same, no download is done.
 			- If file is not present in the cache, the file is downloaded from the shared server using the TCP protocol.
 
-**5. Authentication**
-	- Method for authenticating a user using a password has been implemented. 
+5. Authentication
+	- Method for authenticating a user using a password has been implemented
 	- If the password is correct, the prompt for using the aforementioned functions is shown.
 
-**Contributors**
+Contributors
 - Rahul Sajnani
 - Ajay Shrihari
 
