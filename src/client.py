@@ -54,6 +54,7 @@ class Client:
 
         return info_string
 
+    # FileHash command
     def getFileHash(self, command_list):
         
        
@@ -85,6 +86,7 @@ class Client:
         print(info_string)   
         return 0, 0
 
+    # FileDownload command
     def FileDownload(self, command_list, cache = 0):
 
 
@@ -150,6 +152,7 @@ class Client:
                         udp_socket.settimeout(2)
                         download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                         progress.update(len(download))
+
                     print("File Downloaded")
                     
                 except socket.timeout:
@@ -157,6 +160,7 @@ class Client:
                     udp_socket.close()
                     print("File Downloaded")
 
+    # Cache command
     def Cache(self, command_list):
         '''
         Cache command
@@ -230,6 +234,7 @@ class Client:
             print('Command error. Usage :\nCache verify <filename>\nCache show')
             return None
 
+    # IndexGet command
     def IndexGet(self, command_list):
         
         # if len(command_list) == 3:    
@@ -241,6 +246,7 @@ class Client:
         else:
             print(string_to_print)
 
+    # decode logic
     def decode_command(self, command):
 
         command_list = helper_functions.string_split(command)
