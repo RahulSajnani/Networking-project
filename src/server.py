@@ -1,17 +1,19 @@
 # server.py
+
 import socket
 from _thread import *
 import threading
 import sys
 import config
-# import hashlib
+
 import filehash
 import os
 import time
 import helper_functions
 import tqdm
 from datetime import datetime, date
-import helper_functions
+
+
 '''
 Authors:
 Ajay Shrihari & Rahul Sajnani
@@ -31,6 +33,7 @@ class Server:
         self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
 
     def authenticate(self, client_socket):
+
         '''
         Function to authenticate client
         Input:
@@ -51,12 +54,10 @@ class Server:
             return 0 
 
     def displayFiles(self, client_socket, command_list):
+
         '''
         Function to display files present in server. INDEXGET command
         Output: List of Files
-        TODO:
-            - Get the files from folder with the files
-            - Put them in a list
         Input:
             client_socket - socket object - client socket
             command_list - list - list of command separated with space ( escaped with '\ ')
@@ -112,7 +113,14 @@ class Server:
                 if entry.is_dir() == True:
                     string = entry.name + " | Directory | " + file_time + " | " + str(size)
 
-                else:
+                elif len(command_list) == 4:
+                    if entry.name.lower().endswith(('.txt')):
+                        string_to_search = command_list[3]
+                        if command_list[2].lower().endswith(('.txt')):    
+                            if helper_functions.string_search_txt(self.file_storage_path + "/" + entry.name, string_to_search) == 1:
+                                string = entry.name + " | Text | " + file_time + " | " + str(size)
+            
+                elif len(command_list) == 2:
                     if entry.name.lower().endswith(('.pdf')):
                         string = entry.name + " | PDF | " + file_time + " | " + str(size)
 
@@ -121,14 +129,7 @@ class Server:
 
                     elif entry.name.lower().endswith(('.txt')):
                         string = entry.name + " | Text | " + file_time + " | " + str(size)
-                
-            elif command_list[1].lower() == 'bonus':
-                
-                if entry.name.lower().endswith(('.txt')):
-                    if helper_functions.string_search_txt(self.file_storage_path + "/"+entry.name) == 1:
-                        string = entry.name + " | Text | " + file_time + " | " + str(size)
-                    
-
+        
             if len(string) > 0:
                 string_to_send = string_to_send + string + '\n'
         print(string_to_send)
@@ -142,9 +143,6 @@ class Server:
         Output : should contain the filename , filesize ,
         lastmodified timestamp and the MD5hash of the
         requested file.
-        TODO:
-            - Get the file
-            - Send the file to client
         Input:
             arg - TCP or UDP
             client_socket - client socket object
@@ -187,8 +185,16 @@ class Server:
 
             file_stats = os.stat(path)
             size = file_stats.st_size
-            
-            string_to_send = "Requested file has been found. Filesize: " + str(size) 
+            file_mtime = time.localtime(os.path.getmtime(path))
+            file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
+            hasher = filehash.FileHash('md5')
+            hasher = hasher.hash_file(path)
+            print ("Sending...")
+            file_info_text = ("Filename: %s, Timestamp: %s, MD5hash: %s, Filesize(Bytes): %s" % (filename, str(file_mtime), str(hasher), str(size)))
+        
+            # string_to_send = "Requested file has been found. Filesize: " + str(size)
+            string_to_send = "Requested file has been found.\n" + file_info_text 
+
             print (string_to_send)
             client_socket.send(string_to_send.encode('utf-8'))
 
@@ -203,16 +209,8 @@ class Server:
                     reading = file.read(config.BUFFER_SIZE)
 
                     # print (reading)
-                file_stats = os.stat(path)
-                file_mtime = time.localtime(os.path.getmtime(path))
-                file_mtime = time.strftime('%Y-%m-%d %H:%M:%S',file_mtime) 
                 file.close()
-                # hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
-                hasher = filehash.FileHash('md5')
-                hasher = hasher.hash_file(path)
-                print ("Sending...")
-                print ("Filename:%s, Filesize(Bytes):%s,Timestamp:%s,MD5hash:%s"%(filename,str(file_stats.st_size),str(file_mtime), str(hasher)))
-            
+                
             elif arg == 'udp' or arg == 'UDP':
                 
                 file = open(path, 'rb')
@@ -235,8 +233,6 @@ class Server:
                     if (client_udp_socket.sendto(reading,(client_ip, self.udp_port))):
                         reading = file.read(config.BUFFER_SIZE)
 
-                    # if len(reading) < config.BUFFER_SIZE:
-                    #     break
 
                 file_stats = os.stat(path)
                 file_mtime = time.localtime(os.path.getmtime(path))
@@ -317,48 +313,57 @@ class Server:
             None
         '''
         
-        client_loop = True
-        while client_loop:
+        client_socket.settimeout(config.SOCKET_TIMEOUT)
 
-            command = client_socket.recv(config.BUFFER_SIZE)
-            
-            if command == b'':
-                client_loop = False
-                client_socket.close()
+        try:            
+            client_loop = True
+            while client_loop:
+                client_socket.settimeout(config.SOCKET_TIMEOUT)
 
-            command = command.decode('utf-8')
-            
-            command_list = helper_functions.string_split(command)
-            print(command_list)
-            if len(command_list) == 1:
-                continue
+                command = client_socket.recv(config.BUFFER_SIZE)
+                
+                if command == b'':
+                    client_loop = False
+                    client_socket.close()
 
-            if command_list[0] == 'FileHash':
+                command = command.decode('utf-8')
+                
+                command_list = helper_functions.string_split(command)
+                
+                if len(command_list) == 1:
+                    continue
 
-                if command_list[1] == 'verify':
-                    self.getFileHash(client_socket, command_list[1], command_list[2])
-                    
-                elif command_list[1] == 'checkall':
-                    self.getFileHash(client_socket, command_list[1])
+                if command_list[0] == 'FileHash':
+
+                    if command_list[1] == 'verify':
+                        self.getFileHash(client_socket, command_list[1], command_list[2])
+                        
+                    elif command_list[1] == 'checkall':
+                        self.getFileHash(client_socket, command_list[1])
 
 
-            elif command_list[0] == 'FileDownload':
-                self.sendFile(client_socket, command_list)
+                elif command_list[0] == 'FileDownload':
+                    self.sendFile(client_socket, command_list)
 
-            elif command_list[0] == 'IndexGet':
+                elif command_list[0] == 'IndexGet':
 
-                if command_list[1] == 'shortlist':
-                    self.displayFiles(client_socket, command_list)
-                elif command_list[1] == 'longlist':
-                    self.displayFiles(client_socket, command_list)
-                elif command_list[1] == 'bonus':
-                    self.displayFiles(client_socket, command_list)
-                pass
-            
-            elif command_list[0] == 'quit':
-                client_loop = False
-                print('client closed')
-                client_socket.close()
+                    if command_list[1] == 'shortlist':
+                        self.displayFiles(client_socket, command_list)
+                    elif command_list[1] == 'longlist':
+                        self.displayFiles(client_socket, command_list)
+                    elif command_list[1] == 'bonus':
+                        self.displayFiles(client_socket, command_list)
+                    pass
+                
+                elif command_list[0] == 'quit':
+                    client_loop = False
+                    print('client closed')
+                    client_socket.close()
+
+                client_socket.settimeout(0)
+
+        except socket.timeout:
+            print('Client socket timeout. Disconnected.')
 
                 
 
@@ -396,12 +401,11 @@ class Server:
                     self.authenticated_clients.append(client_socket)
                     print(str(client_ip))
                     
-                    # client_socket.settimeout(config.SOCKET_TIMEOUT)
-                    # try:
+                    
+                        
                     self.client_session(client_socket)
-                    # except:
-                    #     print ('client socket timeout')
-                    #     client_socket.close()
+                    client_socket.settimeout(0)
+                    
 
                     
                         

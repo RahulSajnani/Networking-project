@@ -106,6 +106,7 @@ class Client:
             
         elif command_list[1].lower() == 'udp' or command_list[1].lower() == 'tcp':
             
+            print (string_received)
             if cache:
                 path = self.cache_directory_path+'/' + command_list[2]
             else:    
@@ -193,10 +194,6 @@ class Client:
                 command = 'FileHash verify ' + command_list[2].replace(' ', '\\ ')
                 hash_value, size = self.decode_command(command)
                 
-                
-                print(hash_value)
-                print(hasher)
-                
 
                 if hash_value == 0 and size == 0:
                     download_flag = 0
@@ -214,7 +211,7 @@ class Client:
                 
                 command = 'FileHash verify ' + command_list[2]
                 hash_value, size = self.decode_command(command)
-                print(hash_value+'download')
+                
                 if hash_value == 0 and size == 0:
                     return 0
 
@@ -222,7 +219,7 @@ class Client:
                 
                 if download_flag:
                     command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
-                    print (command)    
+                    print('Downloading file\n')
                     self.client_socket.send(command.encode('utf-8'))
                     command_list = helper_functions.string_split(command)
                     self.FileDownload(command_list, cache=1)
