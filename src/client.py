@@ -56,7 +56,7 @@ class Client:
 
     def getFileHash(self, command_list):
         
-        
+       
         if len(command_list) == 3 or len(command_list) == 2:
             if command_list[1].lower() == 'verify':    
                 hash_value = self.client_socket.recv(config.BUFFER_SIZE)
@@ -130,6 +130,7 @@ class Client:
                         progress.update(len(download))
                         
                 filedown.close()
+                print("File Downloaded")
 
             elif command_list[1] == 'udp' or command_list[1] == 'UDP':
                 udp_socket = ''
@@ -147,11 +148,13 @@ class Client:
                         udp_socket.settimeout(2)
                         download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                         progress.update(len(download))
-                
+                    print("File Downloaded")
+                    
                 except socket.timeout:
                     filedown.close()
                     udp_socket.close()
-                                   
+                    print("File Downloaded")
+
     def Cache(self, command_list):
         '''
         Cache command
@@ -183,14 +186,15 @@ class Client:
         
         elif command_list[1].lower() == 'verify':
             download_flag = 1
+            file_name = command_list[2]
+            file_name = file_name.replace(' ', '\\ ')
             path = self.cache_directory_path + '/' + command_list[2]
             if os.path.exists(path):
-                # hasher = hashlib.md5(open(path,'rb').read()).hexdigest()
                 hasher = filehash.FileHash('md5')
                 hasher = hasher.hash_file(path)
-                command = 'FileHash verify ' + command_list[2].replace(' ', '\\ ')
+                command = 'FileHash verify ' + file_name
+
                 hash_value, size = self.decode_command(command)
-                
 
                 if hash_value == 0 and size == 0:
                     download_flag = 0
@@ -206,7 +210,7 @@ class Client:
 
             if download_flag:
                 
-                command = 'FileHash verify ' + command_list[2]
+                command = 'FileHash verify ' + file_name
                 hash_value, size = self.decode_command(command)
                 
                 if hash_value == 0 and size == 0:
@@ -215,7 +219,7 @@ class Client:
                 download_flag = helper_functions.clear_cache( self.cache_directory_path, size, self.cache_size)
                 
                 if download_flag:
-                    command = 'FileDownload tcp ' + command_list[2].replace(' ', '\\ ')
+                    command = 'FileDownload tcp ' + file_name
                     print('Downloading file\n')
                     self.client_socket.send(command.encode('utf-8'))
                     command_list = helper_functions.string_split(command)

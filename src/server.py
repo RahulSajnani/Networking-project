@@ -63,7 +63,7 @@ class Server:
             command_list - list - list of command separated with space ( escaped with '\ ')
         '''
 
-        print(command_list)
+       
         files = os.scandir(self.file_storage_path)
         string_to_send = ''
         for entry in files:
@@ -342,7 +342,7 @@ class Server:
             None
         
         '''
-        
+        print('Server running')
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         self.server_socket.bind((self.host, self.port_number))
