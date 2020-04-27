@@ -3,7 +3,7 @@ Communication networks project for file uploading and downloading.
 
 __________________________________________________________________
 
-### Things to do:
+### Task:
 
 Project 1: A survey on Vehicular Social Networks
 - [x] Introduction: Existing methodologies - VANET, Pocket Switched Networks, Social Aware Networking and it's importance with examples.
@@ -36,6 +36,7 @@ A P2P file sharing protocol, with functionalities like download and upload for f
     - Apart from this, the client can query only .txt files and .pdf files between specified stamps in the query
     - Usage **(Note the backward slash between date and time)**:
       - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52
+    - 
   - flag longlist
     - This flag allows for the client to view th enture listing of the shared folder present on the server, including the name, size, timestamp and type of file present.
     - The output is the complete listing
@@ -50,6 +51,8 @@ A P2P file sharing protocol, with functionalities like download and upload for f
   	  - Usage **(Note the backward slash between date and time)**:
   	    - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52 *.txt
   	    - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52 *.pdf
+  - Screenshot
+    - ![Alt text](./src/screenshots/indexget.png?raw=true "Command output")
 
 2. FileHash flag(args)
 	- This command allows the client to check if any files on the shared server have been changed. 
@@ -64,6 +67,8 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 		- Returns the filename, checksum, and last modified timestamp of all files present in the shared server folder.
 		- Usage:
 		  - FileHash checkall 
+	- Screenshot
+	  - ![Alt text](./src/screenshots/fileHash.png?raw=true "Command output")
 	
 3. FileDownload flag(args)
 	- This command allows the client to download files from the shared server folder.
@@ -83,6 +88,8 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 		  - FileDownload tcp 000000.png
 		  - FileDownload tcp Lec10.pdf
 		  - FileDownload tcp test\ (copy).txt
+	- Screenshot
+	  - ![Alt text](./src/screenshots/CN_ss_download.png?raw=true "Command output")
 	
 4. Caching flag(args)
   - This command checks if the the requested file is already cached. If true, returns file from the cache without contacting the server.
@@ -96,6 +103,8 @@ A P2P file sharing protocol, with functionalities like download and upload for f
       - Usage **(Note the backward slash for file names with spaces)**:
         - Cache verify 000000.png
         - Cache verify test\ (copy).txt
+  - Screenshot
+    - ![Alt text](./src/screenshots/cache.png?raw=true "Command output")
 
 5. Authentication
 	- Method for authenticating a user using a password has been implemented
