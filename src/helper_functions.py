@@ -92,4 +92,25 @@ def clear_cache(path, size_to_add, cache_size):
 
 # def get_file_hash(path):
 
+def string_search_txt(filename):
+    '''
+    Input:
+    Filename as a string
+    Returns:
+    1 if txt file has the word 'programmer'
+    0 otherwise
+    '''
+    if filename[-4:] == ".txt":
+        with open(filename) as file:
+            if 'Programmer' in file.read():
+                # print ("yes")
+                return 1
+            else:
+                # print ("No")
+                return 0
+    else:
+        print ("File is not a txt file")
 
+## testing helper functions
+# file_storage_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './file-storage-client/'))
+# string_search_txt(file_storage_path+"/bonus_test.txt")

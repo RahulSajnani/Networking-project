@@ -11,7 +11,7 @@ import time
 import helper_functions
 import tqdm
 from datetime import datetime, date
-
+import helper_functions
 '''
 Authors:
 Ajay Shrihari & Rahul Sajnani
@@ -122,7 +122,13 @@ class Server:
                     elif entry.name.lower().endswith(('.txt')):
                         string = entry.name + " | Text | " + file_time + " | " + str(size)
                 
+            elif command_list[1].lower() == 'bonus':
+                
+                if entry.name.lower().endswith(('.txt')):
+                    if helper_functions.string_search_txt(self.file_storage_path + "/"+entry.name) == 1:
+                        string = entry.name + " | Text | " + file_time + " | " + str(size)
                     
+
             if len(string) > 0:
                 string_to_send = string_to_send + string + '\n'
         print(string_to_send)
@@ -344,6 +350,8 @@ class Server:
                 if command_list[1] == 'shortlist':
                     self.displayFiles(client_socket, command_list)
                 elif command_list[1] == 'longlist':
+                    self.displayFiles(client_socket, command_list)
+                elif command_list[1] == 'bonus':
                     self.displayFiles(client_socket, command_list)
                 pass
             
