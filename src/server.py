@@ -1,8 +1,6 @@
 # server.py
 
 import socket
-from _thread import *
-import threading
 import sys
 import config
 
@@ -32,6 +30,7 @@ class Server:
         self.udp_port = 6000
         self.cache_directory_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), './client-cache/'))
 
+    # Client authentication
     def authenticate(self, client_socket):
 
         '''
@@ -53,6 +52,7 @@ class Server:
             client_socket.send('0'.encode('utf-8'))
             return 0 
 
+    # IndexGet command
     def displayFiles(self, client_socket, command_list):
 
         '''
@@ -148,6 +148,7 @@ class Server:
             string_to_send = 'No files to display'
         client_socket.send(string_to_send.encode('utf-8'))
 
+    # FileDownload Command
     def sendFile(self, client_socket, command_list):
         '''
         Function to send files to client(client download file)
@@ -229,6 +230,7 @@ class Server:
             client_socket.send(string_to_send.encode('utf-8'))
             return None
 
+    # FileHash command
     def getFileHash(self, client_socket, command_list):
         '''
         Function to get file hash and send a response to the client
@@ -283,6 +285,7 @@ class Server:
         return_value = "Command error. Usage: FileHash verify <filename>\n FileHash checkall"
         client_socket.send(return_value.encode('utf-8'))
     
+    # Decode logic
     def client_session(self, client_socket):
         '''
         Function to execute client commands.
@@ -365,8 +368,7 @@ class Server:
                     self.authenticated_clients.append(client_socket)
                     print('Client with ip: ' + str(client_ip[0]) + ' connected')
                     self.client_session(client_socket)
-                    
-                    
+                                       
 if __name__ == "__main__":
     
     server = Server()
