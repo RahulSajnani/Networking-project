@@ -192,7 +192,7 @@ class Server:
                 print (string_to_send)
                 client_socket.send(string_to_send.encode('utf-8'))
 
-                # time.sleep(0.1)
+                time.sleep(0.02)
                 
                 if arg == 'tcp' or arg == 'TCP':
                     file = open(path, 'rb')
@@ -212,8 +212,6 @@ class Server:
                     
                     client_ip = client_socket.getpeername()[0]
                     port_number = client_socket.getpeername()
-                    print(port_number)
-                    print (path)
                     
                     if client_ip == '':
                         client_ip = '127.0.0.1'
@@ -223,7 +221,7 @@ class Server:
                     while(reading):
                         if (client_udp_socket.sendto(reading,(client_ip, self.udp_port))):
                             reading = file.read(config.BUFFER_SIZE)
-                            time.sleep(0.0002)
+                            time.sleep(0.02)
                     client_udp_socket.close()
                     file.close()
         else:
