@@ -133,16 +133,18 @@ class Client:
                 print("File Downloaded")
 
             elif command_list[1] == 'udp' or command_list[1] == 'UDP':
+                
                 udp_socket = ''
                 if udp_socket != '':
                     udp_socket.close()
                 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 client_ip = self.client_socket.getsockname()[0]
-
+                
                 udp_socket.bind((client_ip,self.udp_port))
-                download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                 filedown = open(path,'wb')
                 try:
+                    udp_socket.settimeout(2)
+                    download, address = udp_socket.recvfrom(config.BUFFER_SIZE)
                     while(download):
                         filedown.write(download)
                         udp_socket.settimeout(2)
