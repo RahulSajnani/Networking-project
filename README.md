@@ -120,13 +120,12 @@ A P2P file sharing protocol, with functionalities like download and upload for f
   	- A TCP socket is created for this purpose.
 
   	- Usage **(Note the backward slash for file names with spaces)**:
-
-               ```
-               FileDownload tcp 000000.png
-               FileDownload tcp Lec10.pdf
-               FileDownload tcp test\ (copy).txt
-               ```
-
+               
+       ```
+       FileDownload tcp 000000.png
+       FileDownload tcp Lec10.pdf
+       FileDownload tcp test\ (copy).txt
+       ```
   - flag udp/UDP
 
 	  - Allows the client to download files to its file storage using the UDP protocol.
@@ -134,13 +133,11 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 	  - A UDP datagram socket is created for this purpose.
 
 	  - Usage **(Note the backward slash for file names with spaces)**:
-
-               ```
-               FileDownload tcp 000000.png
-               FileDownload tcp Lec10.pdf
-               FileDownload tcp test\ (copy).txt
-               ```
-
+      ```
+      FileDownload udp 000000.png	
+      FileDownload udp Lec10.pdf
+      FileDownload udp test\ (copy).txt
+      ```  
 	 - Screenshot
 
 	   ![Alt text](./src/screenshots/CN_ss_download.png?raw=true "Command output")
