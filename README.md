@@ -43,12 +43,17 @@ A P2P file sharing protocol, with functionalities like download and upload for f
   - **Bonus**
           - longlist flag that displays file containing user defined string.
         - Usage **(Note the backward slash between date and time)**:
-                - IndexGet longlist *.txt <string>
-                 	    - For example if you wish to display text files containing string 'the' the command is: IndexGet longlist *.txt the
+            
+            - IndexGet longlist *.txt <string>
+            - For example if you wish to display text files containing string 'the' the command is: IndexGet longlist *.txt the
+          
           - shortlist flag displaying txt/pdf files between two time stamps
+          
         - Usage **(Note the backward slash between date and time)**:
-                - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52 *.txt
-                 	    - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52 *.pdf
+            
+            - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52 *.txt
+                 - IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52 *.pdf
+        
   - Screenshot
 
     ![Alt text](./src/screenshots/indexget.png?raw=true "Command output")
@@ -83,16 +88,20 @@ A P2P file sharing protocol, with functionalities like download and upload for f
   	- Allows the client to download files to its file storage using the TCP protocol.
   	- A TCP socket is created for this purpose.
   	- Usage **(Note the backward slash for file names with spaces)**:
-  	  - FileDownload tcp 000000.png
-  	  - FileDownload tcp Lec10.pdf
-    - FileDownload tcp test\ (copy).txt
+    	  - FileDownload tcp 000000.png
+      
+        - FileDownload tcp Lec10.pdf
+        
+        - FileDownload tcp test\ (copy).txt
   - flag udp/UDP
   	- Allows the client to download files to its file storage using the UDP protocol.
   	- A UDP datagram socket is created for this purpose.
   	- Usage **(Note the backward slash for file names with spaces)**:
-  	  - FileDownload tcp 000000.png
-  	  - FileDownload tcp Lec10.pdf
-  	  - FileDownload tcp test\ (copy).txt
+    	  - FileDownload tcp 000000.png
+      
+    - FileDownload tcp Lec10.pdf
+    
+      	  - FileDownload tcp test\ (copy).txt
   - Screenshot
 
     ![Alt text](./src/screenshots/CN_ss_download.png?raw=true "Command output")
