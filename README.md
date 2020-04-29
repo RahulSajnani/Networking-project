@@ -115,11 +115,11 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 
   - flag tcp/TCP
 
-          - Allows the client to download files to its file storage using the TCP protocol.
+	- Allows the client to download files to its file storage using the TCP protocol.
 
-          - A TCP socket is created for this purpose.
+  	- A TCP socket is created for this purpose.
 
-          - Usage **(Note the backward slash for file names with spaces)**:
+  	- Usage **(Note the backward slash for file names with spaces)**:
 
                ```
                FileDownload tcp 000000.png
@@ -129,11 +129,11 @@ A P2P file sharing protocol, with functionalities like download and upload for f
 
   - flag udp/UDP
 
-          - Allows the client to download files to its file storage using the UDP protocol.
+	  - Allows the client to download files to its file storage using the UDP protocol.
 
-          - A UDP datagram socket is created for this purpose.
+	  - A UDP datagram socket is created for this purpose.
 
-          - Usage **(Note the backward slash for file names with spaces)**:
+	  - Usage **(Note the backward slash for file names with spaces)**:
 
                ```
                FileDownload tcp 000000.png
@@ -141,9 +141,9 @@ A P2P file sharing protocol, with functionalities like download and upload for f
                FileDownload tcp test\ (copy).txt
                ```
 
-         - Screenshot
+	 - Screenshot
 
-           ![Alt text](./src/screenshots/CN_ss_download.png?raw=true "Command output")
+	   ![Alt text](./src/screenshots/CN_ss_download.png?raw=true "Command output")
 
 4. Caching flag(args)
   - This command checks if the the requested file is already cached. If true, returns file from the cache without contacting the server.
@@ -157,9 +157,9 @@ A P2P file sharing protocol, with functionalities like download and upload for f
       ```
 
     - flag verify
-      - Checks if file is present in cache. If file is present, the Md5 hash of the file in the cache and the server are verified. If they are the same, no download is done.
-      - If file is not present in the cache, the file is downloaded from the shared server using the TCP protocol.
-      - Usage **(Note the backward slash for file names with spaces)**:
+	- Checks if file is present in cache. If file is present, the Md5 hash of the file in the cache and the server are verified. If they are the same, no download is done.
+	- If file is not present in the cache, the file is downloaded from the shared server using the TCP protocol.
+	- Usage **(Note the backward slash for file names with spaces)**:
 
       ```
       Cache verify 000000.png
