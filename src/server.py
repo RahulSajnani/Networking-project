@@ -234,7 +234,7 @@ class Server:
     def getFileHash(self, client_socket, command_list):
         '''
         Function to get file hash and send a response to the client
-        check deocde_command for info of how this will be called.
+        check decode_command for info of how this will be called.
         Input:
             client_socket - client socket object
             command_list - list object
