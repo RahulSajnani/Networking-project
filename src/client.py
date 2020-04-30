@@ -24,7 +24,12 @@ class Client:
         self.cache_size = 3 * 1024 * 1024
 
     def authenticate(self):
-        
+        '''
+        Function on client side to authenticate a user based on a password.
+        Returns:
+        True, if client is authenticated
+        False, otherwise
+        '''
         self.client_socket.connect((self.host_ip, self.port_number))
         msg = self.client_socket.recv(config.BUFFER_SIZE)
 
@@ -41,6 +46,11 @@ class Client:
             self.connection = False
 
     def receiveData(self):
+        '''
+        Function on client side to receive data based on a buffer size from the server
+        Returns:
+        Data of type sent by the server
+        '''
         
         info_string = ''
             
@@ -56,7 +66,11 @@ class Client:
 
     # FileHash command
     def getFileHash(self, command_list):
-        
+        '''
+        Function on client side to request for a MD5 hash value of file.
+        flag verify: to find the MD5 hash of a specific file and display on the client
+        flag checkall: to find and display the MD5 hash of all the files on the server and display on the client 
+        '''
        
         if len(command_list) == 3 or len(command_list) == 2:
             if command_list[1].lower() == 'verify':    
@@ -88,6 +102,12 @@ class Client:
 
     # FileDownload command
     def FileDownload(self, command_list, cache = 0):
+        '''
+        Function to request for a file download based on TCP or UDP
+        Error message is displayed on the client if file is not present.
+        Returns:
+        None
+        '''
 
 
         if len(command_list) != 3:
@@ -236,6 +256,11 @@ class Client:
 
     # IndexGet command
     def IndexGet(self, command_list):
+        '''
+        Client side function to request for a display of files on the server
+        Returns:
+        None
+        '''
         
         # if len(command_list) == 3:    
         string_to_print = ''
@@ -248,6 +273,10 @@ class Client:
 
     # decode logic
     def decode_command(self, command):
+        '''
+        Function on client side for decode logic of various commands given by the client.
+        Based on the command given, different functions are called and the server is pinged for information.
+        '''
 
         command_list = helper_functions.string_split(command)
         
@@ -277,7 +306,9 @@ class Client:
             print('Incorrect command')
     
     def run(self):
-
+        '''
+        Function to run the authentication, clear history, and ask for a command if the the connection has been established 
+        '''
         # Authenticates client
         self.authenticate()
         
