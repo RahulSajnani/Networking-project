@@ -42,9 +42,9 @@ A P2P file sharing protocol, with functionalities like download and upload for f
       IndexGet shortlist 2012-12-17\ 22:06:52 2020-12-19\ 22:06:52
       ```
   - flag longlist
-    - This flag allows for the client to view th enture listing of the shared folder present on the server, including the name, size, timestamp and type of file present.
+    - This flag allows for the client to view the entire listing of the shared folder present on the server, including the name, size, timestamp, and type of file present.
 
-    - The output is the complete listing
+    - The output is the complete listing.
 
     - Usage **(Note the backward slash between date and time)**:
 
