@@ -1,4 +1,4 @@
-# Communication networks project for file storage server and survey on Vehicular Social Networks. [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# Communication networks project for file storage server and survey on Vehicular Social Networks. [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/RahulSajnani/Networking-project/blob/master/LICENSE)
 
 
 
